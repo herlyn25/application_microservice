@@ -1,14 +1,40 @@
-##Spring Configuration
+postgres:
+  host: "${POSTGRES_HOST:127.0.0.1}"
+  port: "${POSTGRES_PORT:5433}"
+  database: "${POSTGRES_DB:crediyapplications}"
+  username: "${POSTGRES_USER:hdj}"
+  password: "${POSTGRES_PASSWORD:salsam2323}"
 server:
-  port: 8080
+  port: 8081
+  error:
+    include-message: "always"
 spring:
   application:
-    name: applicationservices
+    name: "applicationservices"
   devtools:
     add-properties: false
-  h2:
-    console:
+  r2dbc:
+    url: "r2dbc:postgresql://127.0.0.1:5433/crediyapplications"
+    username: "hdj"
+    password: "salsam2323"
+    pool:
       enabled: true
-      path: /h2
-  profiles:
-    include:
+      initial-size: 2
+      max-size: 20
+      max-idle-time: "30m"
+      validation-query: "SELECT 1"
+  sql:
+    init:
+      mode: "never"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,prometheus"
+  endpoint:
+    health:
+      probes:
+        enabled: true
+cors:
+  allowed-origins: "http://localhost:4200,http://localhost:8080"
