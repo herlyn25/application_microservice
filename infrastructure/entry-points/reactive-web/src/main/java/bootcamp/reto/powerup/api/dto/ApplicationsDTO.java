@@ -1,7 +1,9 @@
 package bootcamp.reto.powerup.api.dto;
 
 import bootcamp.reto.powerup.model.states.StatesEnum;
-import org.hibernate.validator.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 
 import java.math.BigDecimal;
 
@@ -9,7 +11,7 @@ public record ApplicationsDTO (
     @NotBlank(message="Amount is required")
     BigDecimal amount,
 
-    @NotBlank (message="terms is required")
+    @NotNull(message="terms is required")
     Integer terms,
 
     @NotBlank(message="email is required")
@@ -24,8 +26,8 @@ public record ApplicationsDTO (
     ) {
 
     public ApplicationsDTO {
-        System.out.println("Al entrar "+states);
+
         states = (states == null || states.trim().isEmpty()) ? states = StatesEnum.PENDIENTE.getCode() : states;
-        System.out.println("Al salir " +states);
+
     }
 }

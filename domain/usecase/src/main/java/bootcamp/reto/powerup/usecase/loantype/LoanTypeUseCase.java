@@ -3,7 +3,6 @@ package bootcamp.reto.powerup.usecase.loantype;
 import bootcamp.reto.powerup.model.exceptions.TypeLoanException;
 import bootcamp.reto.powerup.model.loantype.LoanType;
 import bootcamp.reto.powerup.model.loantype.gateways.LoanTypeRepository;
-import bootcamp.reto.powerup.model.ConstantsApplicattions;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 

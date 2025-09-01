@@ -1,15 +1,23 @@
 apply plugin: 'org.springframework.boot'
 
 dependencies {
-	implementation project(':reactive-web')
-	implementation 'org.reactivecommons.utils:object-mapper:0.1.0'
+
+    // Projects
+    implementation project(':reactive-web')
 	implementation project(':r2dbc-postgresql')
     implementation project(':model')
     implementation project(':usecase')
 
+    // Dependencies
+    implementation 'me.paulschwarz:spring-dotenv:4.0.0'
+    implementation 'org.reactivecommons.utils:object-mapper:0.1.0'
     implementation 'javax.validation:validation-api:2.0.1.Final' // Puedes usar otra versión si es necesario
-    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+    // Development
     runtimeOnly('org.springframework.boot:spring-boot-devtools')
+
+    // Tests
     testImplementation 'com.tngtech.archunit:archunit:1.4.1'
     testImplementation 'com.fasterxml.jackson.core:jackson-databind'
 }

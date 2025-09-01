@@ -19,13 +19,13 @@ public enum LoanTypeEnum {
     STUDENT(4L, "STUD-001", "Student Loan", new BigDecimal("500"), new BigDecimal("40000"),
             new BigDecimal("0.05"), false);
 
-    private Long id;
-    private String uniqueCode;
-    private String name;
-    private BigDecimal minimumAmount;
-    private BigDecimal maximumAmount;
-    private BigDecimal interestRate;
-    private Boolean automaticValidation;
+    private final Long id;
+    private final String uniqueCode;
+    private final String name;
+    private final BigDecimal minimumAmount;
+    private final BigDecimal maximumAmount;
+    private final BigDecimal interestRate;
+    private final Boolean automaticValidation;
 
     LoanTypeEnum(Long id, String uniqueCode, String name,
              BigDecimal minimumAmount, BigDecimal maximumAmount,
