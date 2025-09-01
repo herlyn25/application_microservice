@@ -18,10 +18,9 @@ import java.math.BigDecimal;
 public class ApplicationsEntity {
     @Id private Long id;
     @Column("amount") private BigDecimal amount;
-    @Column("term") private Integer term;
     @Column("email") private String email;
-    @Column("term") private Integer terms;
-    @Column("state") private StatesEntity state;
-    @Column("loan_type") private LoanTypeEntity loanType;
-    @Column("doccument_id") private String doccumentId;
+    @Column("terms") private Integer terms;
+    @Column("states") private String states;
+    @Column("loan_type") private String loanType;
+    @Column("document_id") private String documentId;
 }

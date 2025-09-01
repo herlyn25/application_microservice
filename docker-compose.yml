@@ -7,11 +7,10 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      PGDATA: /var/lib/postgresql/data/pgdata
     ports:
       - "5433:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data  # datos persistentes
+      - /var/lib/postgresql/data  # persistent data
 
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
@@ -19,5 +18,3 @@ services:
       timeout: 5s
       retries: 5
 
-volumes:
-  pgdata: {}

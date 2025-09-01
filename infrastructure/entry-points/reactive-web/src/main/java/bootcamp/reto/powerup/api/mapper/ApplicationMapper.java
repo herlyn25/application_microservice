@@ -10,15 +10,13 @@ public class ApplicationMapper {
     LoanTypeMapper loanTypeMapper = new LoanTypeMapper();
 
     public Applications dtoToApplications(ApplicationsDTO applicationsDTO) {
-        Applications applications = new Applications(
-                null,
+        return new Applications(
                 applicationsDTO.amount(),
                 applicationsDTO.terms(),
                 applicationsDTO.email(),
-                stateMapper.dtoToState(applicationsDTO.state()),
-                loanTypeMapper.dtoToLoanType(applicationsDTO.loanType()),
+                applicationsDTO.states(),
+                applicationsDTO.loanType(),
                 applicationsDTO.documentId()
         );
-        return applications;
     }
 }

@@ -9,40 +9,23 @@ public record ApplicationsDTO (
     @NotBlank(message="Amount is required")
     BigDecimal amount,
 
-    @NotBlank(message="terms is required")
+    @NotBlank (message="terms is required")
     Integer terms,
 
     @NotBlank(message="email is required")
     String email,
 
-    StateDTO state,
+    String states,
 
-    LoanTypeDTO loanType,
+    String loanType,
 
     @NotBlank(message = "document id is required")
     String documentId
     ) {
 
     public ApplicationsDTO {
-        if (state.code()==null){
-            StateDTO stateDTO = new StateDTO(
-                    StatesEnum.PENDIENTE.getCode(),
-                    StatesEnum.PENDIENTE.getName(),
-                    StatesEnum.PENDIENTE.getDescription()
-            );
-            state = stateDTO;
-        }
-        if (!(loanType.uniqueCode() ==null)){
-            LoanTypeDTO loanTypeDTO = new LoanTypeDTO(
-                    loanType.uniqueCode(),
-                    loanType.name(),
-                    loanType.minimumAmount(),
-                    loanType.maximumAmount(),
-                    loanType.interestRate(),
-                    loanType.automaticValidation()
-            );
-            loanType=loanTypeDTO;
-        }
-        loanType=null;
+        System.out.println("Al entrar "+states);
+        states = (states == null || states.trim().isEmpty()) ? states = StatesEnum.PENDIENTE.getCode() : states;
+        System.out.println("Al salir " +states);
     }
 }

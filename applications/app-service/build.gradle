@@ -6,6 +6,8 @@ dependencies {
 	implementation project(':r2dbc-postgresql')
     implementation project(':model')
     implementation project(':usecase')
+
+    implementation 'javax.validation:validation-api:2.0.1.Final' // Puedes usar otra versión si es necesario
     implementation 'org.springframework.boot:spring-boot-starter'
     runtimeOnly('org.springframework.boot:spring-boot-devtools')
     testImplementation 'com.tngtech.archunit:archunit:1.4.1'

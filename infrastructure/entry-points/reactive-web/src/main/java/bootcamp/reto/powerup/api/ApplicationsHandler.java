@@ -2,11 +2,8 @@ package bootcamp.reto.powerup.api;
 
 import bootcamp.reto.powerup.api.dto.ApplicationsDTO;
 import bootcamp.reto.powerup.api.mapper.ApplicationMapper;
-import bootcamp.reto.powerup.model.applications.Applications;
 import bootcamp.reto.powerup.usecase.applicationsusercase.ApplicationsUseCase;
-import bootcamp.reto.powerup.usecase.loantype.LoanTypeUseCase;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.actuate.autoconfigure.wavefront.WavefrontProperties;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -25,9 +22,18 @@ public class ApplicationsHandler {
 
         return  serverRequest.bodyToMono(ApplicationsDTO.class)
                 .map(applicationMapper::dtoToApplications)
-                .map(applicationsUseCase::saveApplication)
-                .flatMap( applicationsSaved -> ServerResponse.created(URI.create("/api/v1/applications"))
+                .flatMap(applicationsUseCase::saveApplication)
+                .flatMap( applicationsSaved ->
+                        ServerResponse.created(URI.create("/api/v1/apps"))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .build());
+                        .build()
+                );
+    }
+
+    public Mono<ServerResponse> listenHello(ServerRequest serverRequest) {
+        String hello = "Hello";
+        return ServerResponse.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(hello);
     }
 }

@@ -12,10 +12,6 @@ public class ApplicationsUseCase {
     private final LoanTypeRepository loanTypeRepository;
 
     public Mono<Applications> saveApplication(Applications applications) {
-        return  loanTypeRepository.findLoanByCode(applications.getLoanType().getUniqueCode())
-                .flatMap(loantype->applicationsRepository.saveApplication(applications))
-                .switchIfEmpty(Mono.error(new IllegalArgumentException(
-                        "No exists Loan Type "+ applications.getLoanType().getUniqueCode()))
-                );
+        return  applicationsRepository.saveApps(applications);
     }
 }

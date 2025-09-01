@@ -20,7 +20,8 @@ public class ApplicationsReactiveRepositoryAdapter extends ReactiveAdapterOperat
     }
 
     @Override
-    public Mono<Applications> saveApplication(Applications applications) {
+    public Mono<Applications> saveApps(Applications applications) {
+
         return super.save(applications);
     }
 }

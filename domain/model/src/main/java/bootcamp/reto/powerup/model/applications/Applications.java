@@ -19,11 +19,11 @@ public class Applications {
     private BigDecimal amount;
     private Integer terms;
     private String email;
-    private States states;
-    private LoanType loanType;
+    private String states;
+    private String loanType;
     private String documentId;
 
-    public Applications(BigDecimal amount, Integer terms, String email, States states, LoanType loanType, String documentId) {
+    public Applications(BigDecimal amount, Integer terms, String email, String states, String loanType, String documentId) {
         this.amount = amount;
         this.terms = terms;
         this.email = email;

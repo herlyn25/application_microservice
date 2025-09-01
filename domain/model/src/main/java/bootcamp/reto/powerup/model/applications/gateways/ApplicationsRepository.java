@@ -5,5 +5,5 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface ApplicationsRepository {
-    Mono<Applications> saveApplication(Applications applications);
+    Mono<Applications> saveApps(Applications applications);
 }

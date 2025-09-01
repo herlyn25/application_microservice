@@ -1,7 +1,7 @@
 postgres:
   host: "${POSTGRES_HOST:127.0.0.1}"
   port: "${POSTGRES_PORT:5433}"
-  database: "${POSTGRES_DB:crediyapplications}"
+  database: "${POSTGRES_DB:crediyapps}"
   username: "${POSTGRES_USER:hdj}"
   password: "${POSTGRES_PASSWORD:salsam2323}"
 server:
@@ -14,7 +14,7 @@ spring:
   devtools:
     add-properties: false
   r2dbc:
-    url: "r2dbc:postgresql://127.0.0.1:5433/crediyapplications"
+    url: "r2dbc:postgresql://127.0.0.1:5433/crediyapps"
     username: "hdj"
     password: "salsam2323"
     pool:
