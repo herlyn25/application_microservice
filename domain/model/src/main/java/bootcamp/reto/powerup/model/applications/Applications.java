@@ -23,12 +23,4 @@ public class Applications {
     private String loanType;
     private String documentId;
 
-    public Applications(BigDecimal amount, Integer terms, String email, String states, String loanType, String documentId) {
-        this.amount = amount;
-        this.terms = terms;
-        this.email = email;
-        this.states = states;
-        this.loanType = loanType;
-        this.documentId = documentId;
-    }
 }

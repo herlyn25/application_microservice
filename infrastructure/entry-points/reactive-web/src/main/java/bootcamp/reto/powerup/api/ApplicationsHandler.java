@@ -38,11 +38,4 @@ public class ApplicationsHandler {
                     )
                 );
     }
-
-    public Mono<ServerResponse> listenHello(ServerRequest serverRequest) {
-        String hello = "Hello";
-        return ServerResponse.ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(hello);
-    }
 }

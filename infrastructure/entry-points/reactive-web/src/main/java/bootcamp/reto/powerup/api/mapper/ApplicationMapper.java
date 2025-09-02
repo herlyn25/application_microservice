@@ -11,6 +11,7 @@ public class ApplicationMapper {
 
     public Applications dtoToApplications(ApplicationsDTO applicationsDTO) {
         return new Applications(
+                null,
                 applicationsDTO.amount(),
                 applicationsDTO.terms(),
                 applicationsDTO.email(),
