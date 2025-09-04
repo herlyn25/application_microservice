@@ -1,13 +1,12 @@
-package bootcamp.reto.powerup.usecase.applicationsusercase;
+package bootcamp.reto.powerup.usecase.application;
 
 import bootcamp.reto.powerup.model.applications.Applications;
 import bootcamp.reto.powerup.model.applications.gateways.ApplicationsRepository;
-import bootcamp.reto.powerup.model.loantype.LoanType;
 import bootcamp.reto.powerup.model.loantype.gateways.LoanTypeRepository;
 import bootcamp.reto.powerup.model.validations.ApplicationsDomainValidation;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
+
 
 @RequiredArgsConstructor
 public class ApplicationsUseCase {
@@ -25,7 +24,7 @@ public class ApplicationsUseCase {
                             saved.setStates(applications.getStates());
                             saved.setDocumentId(applications.getDocumentId());
                             saved.setLoanType(loanType.getName());
-                            return Mono.just(saved);
-                        }).flatMap(applicationsRepository::saveApps));
+                            return applicationsRepository.saveApps(saved);
+                        }));
     }
 }

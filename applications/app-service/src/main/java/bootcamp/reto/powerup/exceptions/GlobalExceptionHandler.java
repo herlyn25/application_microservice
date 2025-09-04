@@ -2,18 +2,40 @@ package bootcamp.reto.powerup.exceptions;
 
 import bootcamp.reto.powerup.model.exceptions.ApplicationValidationException;
 import bootcamp.reto.powerup.model.exceptions.TypeLoanException;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.web.server.ServerWebInputException;
 import reactor.core.publisher.Mono;
-import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import java.time.Instant;
-import java.util.LinkedHashMap;
+import java.util.*;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+    @ExceptionHandler({ServerWebInputException.class})
+    public ResponseEntity<Map<String, Object>> handleBadRequest(ServerWebInputException ex) {
 
+        String message = "Malformed JSON request";
+
+        // Si viene de Jackson, podemos obtener detalle
+        Throwable cause = ex.getCause();
+        if (cause instanceof JsonParseException || cause instanceof JsonMappingException) {
+            message = cause.getMessage();
+        }
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("error", "Bad Request");
+        body.put("message", message);
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(body);
+    }
     @ExceptionHandler(ApplicationValidationException.class)
     public Mono<ResponseEntity<Map<String, Object>>> handleUserValidation(ApplicationValidationException ex) {
         Map<String, Object> body = createErrorResponse(
@@ -57,7 +79,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public Mono<ResponseEntity<Map<String, Object>>> handleGenericException(Exception ex) {
         Map<String, Object> body = createErrorResponse(
-                "Internal Server Error",
+                ex.toString(),
                 "An unexpected error occurred",
                 null
         );

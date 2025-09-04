@@ -1,22 +1,12 @@
-postgres:
-  host: "${POSTGRES_HOST:127.0.0.1}"
-  port: "${POSTGRES_PORT:5433}"
-  database: "${POSTGRES_DB:crediyapps}"
-  username: "${POSTGRES_USER:hdj}"
-  password: "${POSTGRES_PASSWORD:salsam2323}"
-server:
-  port: 8081
-  error:
-    include-message: "always"
 spring:
   application:
     name: "applicationservices"
   devtools:
     add-properties: false
   r2dbc:
-    url: "r2dbc:postgresql://127.0.0.1:5433/crediyapps"
-    username: "hdj"
-    password: "salsam2323"
+    url: "r2dbc:postgresql://${POSTGRES_HOST:127.0.0.1}:${POSTGRES_PORT:5433}/${POSTGRES_DB:crediyapps}"
+    username: "${POSTGRES_USER:hdj}"
+    password: "${POSTGRES_PASSWORD:salsam2323}"
     pool:
       enabled: true
       initial-size: 2
@@ -25,7 +15,22 @@ spring:
       validation-query: "SELECT 1"
   sql:
     init:
-      mode: "never"
+      mode: "always"  # Cambiado de "never" a "always" para ejecutar el schema.sql
+      schema-locations: "classpath:schema.sql"
+
+# Configuración personalizada para PostgreSQL
+postgres:
+  host: "${POSTGRES_HOST:127.0.0.1}"
+  port: ${POSTGRES_PORT:5433}
+  database: "${POSTGRES_DB:crediyapps}"
+  schema: "public"  # Agregado el esquema
+  username: "${POSTGRES_USER:hdj}"
+  password: "${POSTGRES_PASSWORD:salsam2323}"
+
+server:
+  port: 8081
+  error:
+    include-message: "always"
 
 management:
   endpoints:
@@ -36,5 +41,14 @@ management:
     health:
       probes:
         enabled: true
+
 cors:
   allowed-origins: "http://localhost:4200,http://localhost:8080"
+
+# Logging para depurar R2DBC
+logging:
+  level:
+    io.r2dbc.postgresql.QUERY: DEBUG  # Para ver las queries SQL
+    io.r2dbc.postgresql.PARAM: DEBUG  # Para ver los parámetros
+    org.springframework.r2dbc: DEBUG   # Para ver operaciones R2DBC
+    bootcamp.reto.powerup.r2dbc: DEBUG # Para ver logs de tu adapter

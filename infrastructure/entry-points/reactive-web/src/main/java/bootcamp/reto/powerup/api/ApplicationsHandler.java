@@ -3,7 +3,7 @@ package bootcamp.reto.powerup.api;
 import bootcamp.reto.powerup.api.dto.ApplicationsDTO;
 import bootcamp.reto.powerup.api.mapper.ApplicationMapper;
 import bootcamp.reto.powerup.model.exceptions.ApplicationValidationException;
-import bootcamp.reto.powerup.usecase.applicationsusercase.ApplicationsUseCase;
+import bootcamp.reto.powerup.usecase.application.ApplicationsUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
