@@ -55,6 +55,6 @@ public class ApplicationsHandler {
 
         return ServerResponse.ok()
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(userConsumerUseCase.userConsumerGet(size,page), UserConsumerFull.class);
+                .body(userConsumerUseCase.userConsumerGet(page,size), UserConsumerFull.class);
     }
 }

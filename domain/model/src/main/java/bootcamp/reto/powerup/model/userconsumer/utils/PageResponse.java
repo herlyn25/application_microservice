@@ -3,6 +3,7 @@ package bootcamp.reto.powerup.model.userconsumer.utils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Data
@@ -13,4 +14,5 @@ public class PageResponse<T> {
     private int size;
     private long totalElements;
     private int totalPages;
+    private BigDecimal totalAmountApprobation;
 }

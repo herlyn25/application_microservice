@@ -1,10 +1,11 @@
 package bootcamp.reto.powerup.model.userconsumer.gateways;
 
 import bootcamp.reto.powerup.model.userconsumer.UserConsumerFull;
-import reactor.core.publisher.Flux;
+import bootcamp.reto.powerup.model.userconsumer.utils.PageResponse;
+import reactor.core.publisher.Mono;
 
 public interface UserConsumerRepository {
-Flux<UserConsumerFull> userGetApps(int page, int size);
+Mono<PageResponse<UserConsumerFull>> userGetApps(int page, int size);
 
 
 

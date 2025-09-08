@@ -13,6 +13,8 @@ import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
+
 @Slf4j
 @Repository
 public class ApplicationsReactiveRepositoryAdapter extends ReactiveAdapterOperations<
@@ -51,5 +53,17 @@ public class ApplicationsReactiveRepositoryAdapter extends ReactiveAdapterOperat
     public Flux<ApplicationsResponse> findAllApps(int page, int size) {
         return super.repository.findAppsByPage(page, size)
                 .map(apps->mapper.map(apps,ApplicationsResponse.class));
+    }
+
+    @Override
+    public Flux<ApplicationsResponse> findAllApps() {
+        return super.repository.findAllAppsNew()
+                .map(applications->mapper.map(applications,ApplicationsResponse.class));
+    }
+    @Override
+    public Mono<BigDecimal> getTotalAmountApprobation() {
+        return repository.totalAmountApprobation()
+                .doOnNext(total -> log.debug("Total amount approbation: {}", total))
+                .defaultIfEmpty(BigDecimal.ZERO); // En caso de que el resultado sea null
     }
 }
