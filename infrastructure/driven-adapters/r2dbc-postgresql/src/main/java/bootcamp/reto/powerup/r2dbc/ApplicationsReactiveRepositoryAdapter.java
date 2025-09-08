@@ -2,12 +2,15 @@ package bootcamp.reto.powerup.r2dbc;
 
 import bootcamp.reto.powerup.model.applications.Applications;
 import bootcamp.reto.powerup.model.applications.gateways.ApplicationsRepository;
+import bootcamp.reto.powerup.model.userconsumer.utils.ApplicationsResponse;
 import bootcamp.reto.powerup.r2dbc.entities.ApplicationsEntity;
 import bootcamp.reto.powerup.r2dbc.helper.ReactiveAdapterOperations;
+import bootcamp.reto.powerup.model.userconsumer.utils.PageResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.reactive.TransactionalOperator;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Slf4j
@@ -41,5 +44,12 @@ public class ApplicationsReactiveRepositoryAdapter extends ReactiveAdapterOperat
                     log.debug("Saved application: {}", applicationsSaved);
                 })
                 .doOnError(error -> log.error("Error al guardar la solicitud de prestamo", error));
+    }
+
+
+    @Override
+    public Flux<ApplicationsResponse> findAllApps(int page, int size) {
+        return super.repository.findAppsByPage(page, size)
+                .map(apps->mapper.map(apps,ApplicationsResponse.class));
     }
 }

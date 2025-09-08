@@ -2,9 +2,11 @@ package bootcamp.reto.powerup.usecase.application;
 
 import bootcamp.reto.powerup.model.applications.Applications;
 import bootcamp.reto.powerup.model.applications.gateways.ApplicationsRepository;
+import bootcamp.reto.powerup.model.userconsumer.utils.ApplicationsResponse;
 import bootcamp.reto.powerup.model.loantype.gateways.LoanTypeRepository;
 import bootcamp.reto.powerup.model.validations.ApplicationsDomainValidation;
 import lombok.RequiredArgsConstructor;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 
@@ -26,5 +28,8 @@ public class ApplicationsUseCase {
                             saved.setLoanType(loanType.getName());
                             return applicationsRepository.saveApps(saved);
                         }));
+    }
+    public Flux<ApplicationsResponse> findAllAppsFlux(int page, int  size) {
+        return applicationsRepository.findAllApps(page,size);
     }
 }

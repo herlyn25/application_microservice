@@ -55,6 +55,8 @@ public class ApplicationsRouterRest {
                     )
             )})
     public RouterFunction<ServerResponse> routerFunction(ApplicationsHandler applicationsHandler) {
-        return route(POST("/api/v1/apps"), applicationsHandler::listenSaveApplications);
+        return route(POST("/api/v1/apps"), applicationsHandler::listenSaveApplications)
+                .andRoute(GET("/api/v1/apps"), applicationsHandler::listenFindAllApplications)
+                .andRoute(GET("/api/v1/consumer"), applicationsHandler::listenAppsConsumer);
     }
 }

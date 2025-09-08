@@ -65,7 +65,7 @@ public class GlobalExceptionHandler {
         );
         return Mono.just(new ResponseEntity<>(body, HttpStatus.BAD_REQUEST));
     }
-
+/*
     @ExceptionHandler(RuntimeException.class)
     public Mono<ResponseEntity<Map<String, Object>>> handleRuntimeException(RuntimeException ex) {
         Map<String, Object> body = createErrorResponse(
@@ -85,7 +85,7 @@ public class GlobalExceptionHandler {
         );
         return Mono.just(new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR));
     }
-
+*/
     private Map<String, Object> createErrorResponse(String error, String message, Object details) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", Instant.now().toString());

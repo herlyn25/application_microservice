@@ -15,23 +15,19 @@ spring:
       validation-query: "SELECT 1"
   sql:
     init:
-      mode: "always"  # Cambiado de "never" a "always" para ejecutar el schema.sql
+      mode: "always"
       schema-locations: "classpath:schema.sql"
-
-# Configuración personalizada para PostgreSQL
 postgres:
   host: "${POSTGRES_HOST:127.0.0.1}"
-  port: ${POSTGRES_PORT:5433}
+  port: "${POSTGRES_PORT:5433}"
   database: "${POSTGRES_DB:crediyapps}"
-  schema: "public"  # Agregado el esquema
+  schema: "public"
   username: "${POSTGRES_USER:hdj}"
   password: "${POSTGRES_PASSWORD:salsam2323}"
-
 server:
   port: 8081
   error:
     include-message: "always"
-
 management:
   endpoints:
     web:
@@ -41,14 +37,37 @@ management:
     health:
       probes:
         enabled: true
-
+  health:
+    circuitbreakers:
+      enabled: true
 cors:
   allowed-origins: "http://localhost:4200,http://localhost:8080"
-
-# Logging para depurar R2DBC
 logging:
   level:
-    io.r2dbc.postgresql.QUERY: DEBUG  # Para ver las queries SQL
-    io.r2dbc.postgresql.PARAM: DEBUG  # Para ver los parámetros
-    org.springframework.r2dbc: DEBUG   # Para ver operaciones R2DBC
-    bootcamp.reto.powerup.r2dbc: DEBUG # Para ver logs de tu adapter
+    org.springframework.r2dbc: "DEBUG"
+    bootcamp.reto.powerup.r2dbc: "DEBUG"
+adapter:
+  restconsumer:
+    timeout: 5000
+    url: "http://localhost:8080"
+resilience4j:
+  circuitbreaker:
+    instances:
+      testGet:
+        registerHealthIndicator: true
+        failureRateThreshold: 50
+        slowCallRateThreshold: 50
+        slowCallDurationThreshold: "2s"
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 10
+        waitDurationInOpenState: "10s"
+      testPost:
+        registerHealthIndicator: true
+        failureRateThreshold: 50
+        slowCallRateThreshold: 50
+        slowCallDurationThreshold: "2s"
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 10
+        waitDurationInOpenState: "10s"
