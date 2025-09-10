@@ -2,13 +2,12 @@ package bootcamp.reto.powerup.model;
 
 public class ConstantsApps {
 
+
     public static String PATTERN_EMAIL = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
     public static String PATTERN_PHONE = "^[0-9]{7,10}$";
     public static String PATTERN_DOCUMENT_ID = "^[0-9]{6,10}$";
 
-
     // Fields no exists
-
     public static String TYPE_LOAN_NO_EXIST = "Loan no exists";
 
     // Invalid fields
@@ -21,4 +20,11 @@ public class ConstantsApps {
     public static String REQUIRED_DOCUMENT = "Document ID is required";
     public static String REQUIRED_AMOUNT = "Amount is required";
     public static String REQUIRED_TYPE_LOAN = "Type Loan is required";
+
+    //JWT
+    public static String STATUS_403 = "Forbidden";
+    public static String STATUS_401 = "Unauthorized";
+    public static String NOT_FOUND = "No Found resource";
+    public static String TOKEN_INVALID = "Invalid Token";
+    public static final String STATUS_400 = "Token is required";
 }

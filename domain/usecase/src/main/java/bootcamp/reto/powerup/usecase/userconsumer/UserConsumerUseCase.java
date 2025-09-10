@@ -10,7 +10,7 @@ import reactor.core.publisher.Mono;
 public class UserConsumerUseCase {
     private final  UserConsumerRepository repository;
 
-    public Mono<PageResponse<UserConsumerFull>> userConsumerGet(int size, int page) {
-        return repository.userGetApps(size, page);
+    public Mono<PageResponse<UserConsumerFull>> userConsumerGet(int size, int page, String token) {
+        return repository.userGetApps(size, page, token);
     }
 }

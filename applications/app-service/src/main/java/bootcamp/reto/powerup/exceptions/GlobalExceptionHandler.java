@@ -1,5 +1,6 @@
 package bootcamp.reto.powerup.exceptions;
 
+import bootcamp.reto.powerup.consumer.exceptions.JwtException;
 import bootcamp.reto.powerup.model.exceptions.ApplicationValidationException;
 import bootcamp.reto.powerup.model.exceptions.TypeLoanException;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -63,9 +64,18 @@ public class GlobalExceptionHandler {
                 ex.getMessage() != null ? ex.getMessage() : "Invalid request parameters",
                 null
         );
+        return Mono.just(new ResponseEntity<>(body, HttpStatus.BAD_REQUEST));    }
+
+    @ExceptionHandler(JwtException.class)
+    public Mono<ResponseEntity<Map<String, Object>>> handleRuntimeException(JwtException jwt) {
+        Map<String, Object> body = createErrorResponse(
+                "problemas de permiso",
+                jwt.getMessage(),
+                null
+        );
         return Mono.just(new ResponseEntity<>(body, HttpStatus.BAD_REQUEST));
     }
-/*
+
     @ExceptionHandler(RuntimeException.class)
     public Mono<ResponseEntity<Map<String, Object>>> handleRuntimeException(RuntimeException ex) {
         Map<String, Object> body = createErrorResponse(
@@ -85,7 +95,7 @@ public class GlobalExceptionHandler {
         );
         return Mono.just(new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR));
     }
-*/
+
     private Map<String, Object> createErrorResponse(String error, String message, Object details) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", Instant.now().toString());
