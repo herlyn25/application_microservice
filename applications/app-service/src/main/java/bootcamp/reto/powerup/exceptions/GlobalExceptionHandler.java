@@ -1,6 +1,7 @@
 package bootcamp.reto.powerup.exceptions;
 
 import bootcamp.reto.powerup.consumer.exceptions.JwtException;
+import bootcamp.reto.powerup.model.ConstantsApps;
 import bootcamp.reto.powerup.model.exceptions.ApplicationValidationException;
 import bootcamp.reto.powerup.model.exceptions.TypeLoanException;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import java.time.Instant;
 import java.util.*;
+
+import static bootcamp.reto.powerup.model.ConstantsApps.*;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -64,18 +67,20 @@ public class GlobalExceptionHandler {
                 ex.getMessage() != null ? ex.getMessage() : "Invalid request parameters",
                 null
         );
-        return Mono.just(new ResponseEntity<>(body, HttpStatus.BAD_REQUEST));    }
-
-    @ExceptionHandler(JwtException.class)
-    public Mono<ResponseEntity<Map<String, Object>>> handleRuntimeException(JwtException jwt) {
-        Map<String, Object> body = createErrorResponse(
-                "problemas de permiso",
-                jwt.getMessage(),
-                null
-        );
         return Mono.just(new ResponseEntity<>(body, HttpStatus.BAD_REQUEST));
     }
 
+    @ExceptionHandler(JwtException.class)
+    public Mono<ResponseEntity<Map<String, Object>>> handleAuthorizationException(JwtException jwtEx) {
+        Map<String, Object> body = createErrorResponse(
+                "prblemas de autorizacion",
+                jwtEx.getMessage() ,
+                null
+        );
+        return Mono.just(new ResponseEntity<>(body, jwtEx.getHttpStatus()));
+
+    }
+    
     @ExceptionHandler(RuntimeException.class)
     public Mono<ResponseEntity<Map<String, Object>>> handleRuntimeException(RuntimeException ex) {
         Map<String, Object> body = createErrorResponse(
