@@ -16,8 +16,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import java.time.Instant;
 import java.util.*;
 
-import static bootcamp.reto.powerup.model.ConstantsApps.*;
-
 @ControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler({ServerWebInputException.class})
@@ -78,9 +76,8 @@ public class GlobalExceptionHandler {
                 null
         );
         return Mono.just(new ResponseEntity<>(body, jwtEx.getHttpStatus()));
-
     }
-    
+
     @ExceptionHandler(RuntimeException.class)
     public Mono<ResponseEntity<Map<String, Object>>> handleRuntimeException(RuntimeException ex) {
         Map<String, Object> body = createErrorResponse(

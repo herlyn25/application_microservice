@@ -29,7 +29,4 @@ public class ApplicationsUseCase {
                             return applicationsRepository.saveApps(saved);
                         }));
     }
-    public Flux<ApplicationsResponse> findAllAppsFlux(int page, int  size) {
-        return applicationsRepository.findAllApps(page,size);
-    }
 }

@@ -41,16 +41,6 @@ public class ApplicationsHandler {
                     )
                 );
     }
-    public Mono<ServerResponse> listenFindAllApplications(ServerRequest serverRequest) {
-        int page = Integer.parseInt(serverRequest.queryParam("page").orElse("1"));
-        int size = Integer.parseInt(serverRequest.queryParam("size").orElse("5"));
-
-
-        return ServerResponse.ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(applicationsUseCase.findAllAppsFlux(page, size),Applications.class);
-    }
-
     public Mono<ServerResponse> listenAppsConsumer(ServerRequest serverRequest) {
         int size = Integer.parseInt(serverRequest.queryParam("size").orElse("5"));
         int page = Integer.parseInt(serverRequest.queryParam("page").orElse("1"));
