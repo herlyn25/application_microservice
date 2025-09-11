@@ -35,7 +35,7 @@ public class RestConsumer implements UserConsumerRepository {
     private final ApplicationsRepository  applicationsRepository;
 
     @Override
-    public Mono<PageResponse<UserConsumerFull>> userGetApps(int size, int page, String token) {
+    public Mono<PageResponse<UserConsumerFull>> userGetApps(int page, int size, String token) {
         return isValidToken(token)
                 .flatMap(tokenValid -> {
                     if (!tokenValid) {
@@ -51,10 +51,10 @@ public class RestConsumer implements UserConsumerRepository {
         Mono< BigDecimal > totalAmountApprobationMono = applicationsRepository.getTotalAmountApprobation();
 
         return Mono.zip(userConsumersMono,totalElementsMono, totalAmountApprobationMono)
-                .map(tupeElements -> {
-                    List<UserConsumerFull> userConsumerFullList = tupeElements.getT1();
-                    Long totalElements = tupeElements.getT2();
-                    BigDecimal totalApprobation = tupeElements.getT3();
+                .map(tupleElements -> {
+                    List<UserConsumerFull> userConsumerFullList = tupleElements.getT1();
+                    Long totalElements = tupleElements.getT2();
+                    BigDecimal totalApprobation = tupleElements.getT3();
                     int totalPages = (int) Math.ceil((double) totalElements/ size);
                     return new PageResponse<>(
                             userConsumerFullList,
@@ -66,21 +66,20 @@ public class RestConsumer implements UserConsumerRepository {
                 });
     });
     }
-
-    private Mono<UserConsumer> userGet(String email, String token) {
+    @Override
+    public Mono<UserConsumer> userGet(String email, String token) {
         return client.get()
                                 .uri("/api/v1/users/{email}", email)
                                 .header("Authorization", "Bearer " + token)
                                 .retrieve()
                                 .bodyToMono(UserConsumer.class);
     }
-
+    @Override
     public Mono<Boolean> isValidToken(String token) {
         return Mono.fromCallable(() -> {
             if (token == null || token.isEmpty()) {
                 throw new JwtException(HttpStatus.BAD_REQUEST,ConstantsApps.STATUS_400);
             }
-
             try {
                 // Decodificar el token
                 DecodedJWT decodedJWT = JWT.decode(token);
@@ -94,13 +93,10 @@ public class RestConsumer implements UserConsumerRepository {
                     log.error("Token expired");
                     throw new JwtException(HttpStatus.UNAUTHORIZED,ConstantsApps.TOKEN_EXPIRED);
                 }
-
                 return true;
-
             } catch (JWTDecodeException e) {
                 log.error("Invalid token format: {}", e.getMessage());
                 throw new JwtException(HttpStatus.UNAUTHORIZED,ConstantsApps.TOKEN_INVALID);
-
             }
         });
     }

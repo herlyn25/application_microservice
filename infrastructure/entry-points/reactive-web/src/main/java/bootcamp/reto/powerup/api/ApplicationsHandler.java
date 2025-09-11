@@ -8,6 +8,7 @@ import bootcamp.reto.powerup.model.userconsumer.UserConsumerFull;
 import bootcamp.reto.powerup.usecase.application.ApplicationsUseCase;
 import bootcamp.reto.powerup.usecase.userconsumer.UserConsumerUseCase;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -44,10 +45,18 @@ public class ApplicationsHandler {
     public Mono<ServerResponse> listenAppsConsumer(ServerRequest serverRequest) {
         int size = Integer.parseInt(serverRequest.queryParam("size").orElse("5"));
         int page = Integer.parseInt(serverRequest.queryParam("page").orElse("1"));
-        String token = serverRequest.queryParam("token").orElse(null);
+        Optional<String> authHeader = Objects.requireNonNull(serverRequest.headers().firstHeader("Authorization")).describeConstable();
+
+        if (authHeader.isEmpty() || !authHeader.get().startsWith("Bearer ")) {
+            return ServerResponse.status(HttpStatus.UNAUTHORIZED)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(Map.of("error", "Token Bearer requerido"));
+        }
+
+        String token = authHeader.get().substring(7);
 
         return ServerResponse.ok()
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(userConsumerUseCase.userConsumerGet(page,size, token), UserConsumerFull.class);
+                .body(userConsumerUseCase.userConsumerGet(page,size,token), UserConsumerFull.class);
     }
 }

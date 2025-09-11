@@ -51,7 +51,8 @@ public class ApplicationsReactiveRepositoryAdapter extends ReactiveAdapterOperat
 
     @Override
     public Flux<ApplicationsResponse> findAllApps(int page, int size) {
-        return super.repository.findAppsByPage(page, size)
+        int offset =  (page - 1) * size;
+        return super.repository.findAppsByPage(size, offset)
                 .map(apps->mapper.map(apps,ApplicationsResponse.class));
     }
 

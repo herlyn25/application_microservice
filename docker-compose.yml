@@ -4,17 +4,51 @@ services:
     container_name: powerup_apps
     restart: always
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: crediyapps
+      POSTGRES_USER: hdj
+      POSTGRES_PASSWORD: salsam2323
     ports:
       - "5433:5432"
     volumes:
-      - /var/lib/postgresql/data  # persistent data
+      - postgres_data:/var/lib/postgresql/data  # persistent data
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    networks:
+      - crediya-network
 
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 20
+
+  requests_crediya:
+    build:
+      context: .
+      dockerfile: deployment/Dockerfile
+    container_name: requests_container
+    environment:
+      - POSTGRES_HOST=powerup_applications
+      - POSTGRES_PORT=5432
+      - POSTGRES_DATABASE=crediyapps
+      - POSTGRES_USERNAME=hdj
+      - POSTGRES_PASSWORD=salsam2323
+      - SPRING_PROFILES_ACTIVE=docker
+      - REST_CONSUMER_URL=http://host.docker.internal:8080
+    ports:
+      - "8081:8081"
+    depends_on:
+      powerup_applications:
+        condition: service_healthy
+    networks:
+      - crediya-network
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+networks:
+  crediya-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
 
