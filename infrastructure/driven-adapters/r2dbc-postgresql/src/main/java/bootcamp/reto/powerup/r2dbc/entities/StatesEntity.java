@@ -16,6 +16,6 @@ import org.springframework.data.relational.core.mapping.Table;
 public class StatesEntity {
     @Id
     private Integer id;
-    @Column String name;
-    @Column String description;
+    @Column("name") String name;
+    @Column("description") String description;
 }

@@ -10,7 +10,9 @@ import java.math.BigDecimal;
 
 public interface ApplicationsRepository {
     Mono<Applications> saveApps(Applications applications);
+    Mono<Applications> updateApps(Long id,Long state);
     Flux<ApplicationsResponse> findAllApps(int page, int size);
     Flux<ApplicationsResponse> findAllApps();
     Mono<BigDecimal> getTotalAmountApprobation();
+    Mono<Applications> findAppsById(Long id);
 }

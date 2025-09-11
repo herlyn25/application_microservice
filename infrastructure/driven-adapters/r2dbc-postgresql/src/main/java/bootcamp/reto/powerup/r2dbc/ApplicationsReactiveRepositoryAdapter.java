@@ -1,7 +1,11 @@
 package bootcamp.reto.powerup.r2dbc;
 
+import bootcamp.reto.powerup.model.ConstantsApps;
 import bootcamp.reto.powerup.model.applications.Applications;
 import bootcamp.reto.powerup.model.applications.gateways.ApplicationsRepository;
+import bootcamp.reto.powerup.model.exceptions.ResourceNotFoundException;
+import bootcamp.reto.powerup.model.states.States;
+import bootcamp.reto.powerup.model.states.gateways.StatesRepository;
 import bootcamp.reto.powerup.model.userconsumer.utils.ApplicationsResponse;
 import bootcamp.reto.powerup.r2dbc.entities.ApplicationsEntity;
 import bootcamp.reto.powerup.r2dbc.helper.ReactiveAdapterOperations;
@@ -24,9 +28,12 @@ public class ApplicationsReactiveRepositoryAdapter extends ReactiveAdapterOperat
         ApplicationsReactiveRepository
 > implements ApplicationsRepository {
     private final TransactionalOperator transactionalOperator;
-    public ApplicationsReactiveRepositoryAdapter(ApplicationsReactiveRepository repository, ObjectMapper mapper, TransactionalOperator transactionalOperator) {
+    private final StatesRepository statesRepository;
+
+    public ApplicationsReactiveRepositoryAdapter(ApplicationsReactiveRepository repository, ObjectMapper mapper, TransactionalOperator transactionalOperator, StatesRepository statesRepository) {
         super(repository, mapper, entity -> mapper.map(entity, Applications.class));
         this.transactionalOperator = transactionalOperator;
+        this.statesRepository = statesRepository;
     }
 
     @Override
@@ -48,6 +55,26 @@ public class ApplicationsReactiveRepositoryAdapter extends ReactiveAdapterOperat
                 .doOnError(error -> log.error("Error al guardar la solicitud de prestamo", error));
     }
 
+    @Override
+    public Mono<Applications> updateApps(Long idApps, Long state) {
+        return Mono.zip(validateIdApps(idApps), validateState(state))
+                .flatMap(validatedIds -> {
+                    Long validIdApps = validatedIds.getT1();
+                    Long validState = validatedIds.getT2();
+
+                    Mono<States> statesMono = statesRepository.findStateById(validState);
+                    Mono<Applications> applicationsMono = findAppsById(validIdApps);
+
+                    return Mono.zip(statesMono, applicationsMono);
+                })
+                .flatMap(tupleData -> {
+                    States states = tupleData.getT1();
+                    Applications applications = tupleData.getT2();
+                    log.info("Estado de prestamo: {}", states.getName());
+                    applications.setStates(states.getName());
+                    return super.save(applications);
+                });
+    }
 
     @Override
     public Flux<ApplicationsResponse> findAllApps(int page, int size) {
@@ -66,5 +93,24 @@ public class ApplicationsReactiveRepositoryAdapter extends ReactiveAdapterOperat
         return repository.totalAmountApprobation()
                 .doOnNext(total -> log.debug("Total amount approbation: {}", total))
                 .defaultIfEmpty(BigDecimal.ZERO); // En caso de que el resultado sea null
+    }
+
+    @Override
+    public Mono<Applications> findAppsById(Long id) {
+        return super.findById(id).switchIfEmpty(Mono.error(new ResourceNotFoundException(ConstantsApps.APPLICATIONS_NO_EXIST)));
+    }
+
+    private Mono<Long> validateState(Long id){
+        if(id==null || id.intValue()<=0 ){
+            return Mono.error(new ResourceNotFoundException(ConstantsApps.STATE_REQUERIED_FIELD));
+        }
+        return Mono.just(id);
+    }
+
+    private Mono<Long> validateIdApps(Long id){
+        if(id==null || id.intValue()<=0 ){
+            return Mono.error(new ResourceNotFoundException(ConstantsApps.ID_APPS_REQUERIED_FIELD));
+        }
+        return Mono.just(id);
     }
 }

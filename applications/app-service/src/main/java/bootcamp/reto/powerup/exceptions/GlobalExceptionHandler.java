@@ -1,8 +1,8 @@
 package bootcamp.reto.powerup.exceptions;
 
 import bootcamp.reto.powerup.consumer.exceptions.JwtException;
-import bootcamp.reto.powerup.model.ConstantsApps;
 import bootcamp.reto.powerup.model.exceptions.ApplicationValidationException;
+import bootcamp.reto.powerup.model.exceptions.ResourceNotFoundException;
 import bootcamp.reto.powerup.model.exceptions.TypeLoanException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -18,10 +18,20 @@ import java.util.*;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public Mono<ResponseEntity<Map<String, Object>>> handleResourceNotFoundValidation(ResourceNotFoundException ex) {
+        Map<String, Object> body = createErrorResponse(
+                ConstantsException.ERROR_VALIDATION,
+                ex.getMessage(),
+                null
+        );
+        return Mono.just(new ResponseEntity<>(body, HttpStatus.BAD_REQUEST));
+    }
     @ExceptionHandler({ServerWebInputException.class})
     public ResponseEntity<Map<String, Object>> handleBadRequest(ServerWebInputException ex) {
 
-        String message = "Malformed JSON request";
+        String message = ConstantsException.BAD_JSON_FORMAT;
 
         // Si viene de Jackson, podemos obtener detalle
         Throwable cause = ex.getCause();
@@ -41,7 +51,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ApplicationValidationException.class)
     public Mono<ResponseEntity<Map<String, Object>>> handleUserValidation(ApplicationValidationException ex) {
         Map<String, Object> body = createErrorResponse(
-                "Validation Error",
+                ConstantsException.ERROR_VALIDATION,
                 ex.getMessage(),
                 ex.getErrors()
         );
@@ -51,7 +61,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(TypeLoanException.class)
     public Mono<ResponseEntity<Map<String, Object>>> handleEmailAlreadyUsed(TypeLoanException ex) {
         Map<String, Object> body = createErrorResponse(
-                "Loan Type",
+                ConstantsException.LOAN_TYPE_NOT_FOUND,
                 ex.getMessage(),
                 null
         );
@@ -61,8 +71,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public Mono<ResponseEntity<Map<String, Object>>> handleIllegalArgument(IllegalArgumentException ex) {
         Map<String, Object> body = createErrorResponse(
-                "Invalid Arguments",
-                ex.getMessage() != null ? ex.getMessage() : "Invalid request parameters",
+               ConstantsException.INVALID_ARGUMENTS,
+                ex.getMessage() != null ? ex.getMessage() : ConstantsException.INVALID_REQUEST_PARAMETERS,
                 null
         );
         return Mono.just(new ResponseEntity<>(body, HttpStatus.BAD_REQUEST));
@@ -71,7 +81,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(JwtException.class)
     public Mono<ResponseEntity<Map<String, Object>>> handleAuthorizationException(JwtException jwtEx) {
         Map<String, Object> body = createErrorResponse(
-                "prblemas de autorizacion",
+                ConstantsException.AUTHORIZATION_ERRORS,
                 jwtEx.getMessage() ,
                 null
         );
@@ -81,8 +91,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RuntimeException.class)
     public Mono<ResponseEntity<Map<String, Object>>> handleRuntimeException(RuntimeException ex) {
         Map<String, Object> body = createErrorResponse(
-                "Internal Server Error",
-                "An unexpected error occurred",
+                ConstantsException.INTERNAL_SERVER_ERROR,
+                ConstantsException.AN_UNEXPECTED_ERROR,
                 null
         );
         return Mono.just(new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR));
@@ -92,7 +102,7 @@ public class GlobalExceptionHandler {
     public Mono<ResponseEntity<Map<String, Object>>> handleGenericException(Exception ex) {
         Map<String, Object> body = createErrorResponse(
                 ex.toString(),
-                "An unexpected error occurred",
+                ConstantsException.AN_UNEXPECTED_ERROR,
                 null
         );
         return Mono.just(new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR));
@@ -100,11 +110,11 @@ public class GlobalExceptionHandler {
 
     private Map<String, Object> createErrorResponse(String error, String message, Object details) {
         Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", Instant.now().toString());
-        body.put("error", error);
-        body.put("message", message);
+        body.put(ConstantsException.TIMESTAMP, Instant.now().toString());
+        body.put(ConstantsException.ERROR, error);
+        body.put(ConstantsException.MESSAGE, message);
         if (details != null) {
-            body.put("details", details);
+            body.put(ConstantsException.DETAILS, details);
         }
         return body;
     }

@@ -26,8 +26,6 @@ public record ApplicationsDTO (
     ) {
 
     public ApplicationsDTO {
-
-        states = (states == null || states.trim().isEmpty()) ? states = StatesEnum.PENDIENTE.getCode() : states;
-
+        states = (states == null || states.trim().isEmpty()) ? states = StatesEnum.PENDIENTE.getName() : states;
     }
 }

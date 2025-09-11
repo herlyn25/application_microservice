@@ -2,8 +2,10 @@ package bootcamp.reto.powerup.api;
 
 import bootcamp.reto.powerup.api.dto.ApplicationsDTO;
 import bootcamp.reto.powerup.api.mapper.ApplicationMapper;
+import bootcamp.reto.powerup.model.ConstantsApps;
 import bootcamp.reto.powerup.model.applications.Applications;
 import bootcamp.reto.powerup.model.exceptions.ApplicationValidationException;
+import bootcamp.reto.powerup.model.exceptions.ResourceNotFoundException;
 import bootcamp.reto.powerup.model.userconsumer.UserConsumerFull;
 import bootcamp.reto.powerup.usecase.application.ApplicationsUseCase;
 import bootcamp.reto.powerup.usecase.userconsumer.UserConsumerUseCase;
@@ -58,5 +60,19 @@ public class ApplicationsHandler {
         return ServerResponse.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(userConsumerUseCase.userConsumerGet(page,size,token), UserConsumerFull.class);
+    }
+    public Mono<ServerResponse> listenUpdateStateApplications(ServerRequest serverRequest) {
+        Long idApps = Long.valueOf(serverRequest.pathVariable("id"));
+        Optional<String> stateParam = serverRequest.queryParam("state");
+        if (stateParam.isEmpty()) {
+            return Mono.error(new ResourceNotFoundException(ConstantsApps.STATE_REQUERIED_FIELD));
+        }
+        Long idState = Long.valueOf(stateParam.get());
+
+        return applicationsUseCase.updateApplication(idApps, idState).flatMap(
+                applicationsUpdated -> ServerResponse.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(applicationsUpdated)
+                );
     }
 }

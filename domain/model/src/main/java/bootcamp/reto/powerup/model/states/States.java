@@ -12,7 +12,6 @@ import lombok.Setter;
 @Builder(toBuilder = true)
 public class States {
     private Integer id;
-    private String uniqueCode;
     private String name;
     private String description;
 

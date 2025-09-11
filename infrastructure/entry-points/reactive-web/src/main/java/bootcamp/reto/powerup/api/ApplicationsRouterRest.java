@@ -15,8 +15,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
-import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
-import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
+import static org.springframework.web.reactive.function.server.RequestPredicates.*;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 @Configuration
@@ -85,10 +84,43 @@ public class ApplicationsRouterRest {
                                     @ApiResponse(responseCode = "403", description = "No autorizado para recurso aun con token")
                             }
                     )
+            ),
+            @RouterOperation(
+                    path = "/api/v1/apps/{id}",
+                    method = RequestMethod.PUT,
+                    consumes = { MediaType.APPLICATION_JSON_VALUE },
+                    produces = { MediaType.APPLICATION_JSON_VALUE },
+                    beanClass = ApplicationsHandler.class,
+                    beanMethod = "listenUpdateStateApplications",
+                    operation = @Operation(
+                            operationId = "updateApps",
+                            summary = "Actualizar estado solicitudes pendientes",
+                            tags = { "Applications" },
+                            requestBody = @RequestBody(
+                                    required = true,
+                                    description = "Actualizar datos de una solicitud de prestamo",
+                                    content = @Content(
+                                            schema = @Schema(
+                                                    implementation = bootcamp.reto.powerup.model.applications.Applications.class // ← cambia al paquete real de tu DTO si es distinto
+                                            )
+                                    )
+                            ),
+                            responses = {
+                                    @ApiResponse(responseCode = "200", description = "Actualizo Solicitud",
+                                            content = @Content(
+                                                    schema = @Schema(implementation = bootcamp.reto.powerup.model.applications.Applications.class)
+                                            )
+                                    ),
+                                    @ApiResponse(responseCode = "400", description = "Error de formato de Token o no paso token"),
+                                    @ApiResponse(responseCode = "401", description = "No Autorizado indica una falla en la autenticación"),
+                                    @ApiResponse(responseCode = "403", description = "No autorizado para recurso aun con token")
+                            }
+                    )
             )
     })
     public RouterFunction<ServerResponse> routerFunction(ApplicationsHandler applicationsHandler) {
         return route(POST("/api/v1/apps"), applicationsHandler::listenSaveApplications)
-                .andRoute(GET("/api/v1/apps"), applicationsHandler::listenAppsConsumer);
+                .andRoute(GET("/api/v1/apps"), applicationsHandler::listenAppsConsumer)
+                .andRoute(PUT("/api/v1/apps/{id}"), applicationsHandler::listenUpdateStateApplications);
     }
 }

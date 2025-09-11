@@ -9,7 +9,6 @@ public class StateMapper {
     public States dtoToState(StateDTO stateDTO) {
         States states = new States(
                 null,
-                stateDTO.code(),
                 stateDTO.name(),
                 stateDTO.description()
         );

@@ -1,14 +1,15 @@
+-- Crear tabla states
 CREATE TABLE IF NOT EXISTS states (
     id SERIAL PRIMARY KEY,          -- id autoincrementable
     name VARCHAR(255) UNIQUE NOT NULL,  -- name debe ser único y no nulo
     description TEXT               -- description puede ser texto largo
     );
-INSERT INTO states (id, name, description)
-values
-    (1,'PPV', 'Pendiente'),
-    (2,'EN', 'En proceso'),
-    (3,'APROB', 'Aprobado'),
-    (4,'DSB', 'Desembolsado a cliente')
+
+-- Insertar en tabla states
+insert into states (name,description)
+values ('PPV','Pendiente'),
+    ('APROB', 'Aprobado'),
+    ('RCHZ', 'Rechazado')
 ON CONFLICT(name) DO NOTHING;
 
 -- Crear tabla de tipos de préstamo primero (por las dependencias)

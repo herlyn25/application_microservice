@@ -5,5 +5,4 @@ public record StateDTO(
         String name,
         String description
 ) {
-
 }
