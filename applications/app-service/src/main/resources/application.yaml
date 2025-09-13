@@ -58,7 +58,7 @@ adapter:
       access-key: "${AWS_ACCESS_KEY_ID}"
       secret-key: "${AWS_SECRET_ACCESS_KEY}"
 jwt:
-  secret: "$mySecretKeyForJWT2024VeryLongAndSecureKey123456789"
+  secret-key: "$mySecretKeyForJWT2024VeryLongAndSecureKey123456789"
   expiration: 3600000
 
 

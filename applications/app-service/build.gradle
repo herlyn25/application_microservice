@@ -17,9 +17,15 @@ dependencies {
     implementation 'org.reactivecommons.utils:object-mapper:0.1.0'
     implementation 'javax.validation:validation-api:2.0.1.Final' // Puedes usar otra versión si es necesario
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+    implementation "org.springframework.boot:spring-boot-starter-security"
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+
 
     // Development
     runtimeOnly('org.springframework.boot:spring-boot-devtools')
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
     // Tests
     testImplementation 'com.tngtech.archunit:archunit:1.4.1'
