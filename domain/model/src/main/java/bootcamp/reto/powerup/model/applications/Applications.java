@@ -22,5 +22,4 @@ public class Applications {
     private String states;
     private String loanType;
     private String documentId;
-
 }

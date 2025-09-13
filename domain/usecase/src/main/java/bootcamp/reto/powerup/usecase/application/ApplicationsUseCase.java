@@ -29,7 +29,7 @@ public class ApplicationsUseCase {
                             return applicationsRepository.saveApps(saved);
                         }));
     }
-    public Mono<Applications> updateApplication(Long id, Long state) {
+    public Mono<String> updateApplication(Long id, Long state) {
         return applicationsRepository.updateApps(id, state);
     }
 }

@@ -31,4 +31,8 @@ public class ConstantsApps {
     public static final String TOKEN_INVALID = "Invalid Token";
     public static final String STATUS_400 = "Token is required";
     public static final String TOKEN_EXPIRED = "Token expired";
+
+    // SQS
+    public static final String STATE_DIFFERENT_APROB_RECH = "Status other than approved or rejected";
+    public static final String ERROR_TO_UPDATE = "Error updating credit request: ";
 }

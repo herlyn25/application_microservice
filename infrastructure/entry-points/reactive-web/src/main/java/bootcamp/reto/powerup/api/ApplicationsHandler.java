@@ -8,8 +8,10 @@ import bootcamp.reto.powerup.model.exceptions.ApplicationValidationException;
 import bootcamp.reto.powerup.model.exceptions.ResourceNotFoundException;
 import bootcamp.reto.powerup.model.userconsumer.UserConsumerFull;
 import bootcamp.reto.powerup.usecase.application.ApplicationsUseCase;
+import bootcamp.reto.powerup.usecase.sqs.SQSUseCase;
 import bootcamp.reto.powerup.usecase.userconsumer.UserConsumerUseCase;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,13 +21,13 @@ import reactor.core.publisher.*;
 import java.net.URI;
 import java.util.*;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class ApplicationsHandler {
     private  final ApplicationsUseCase applicationsUseCase;
     private final ApplicationMapper applicationMapper;
     private final UserConsumerUseCase  userConsumerUseCase;
-
 
     public Mono<ServerResponse> listenSaveApplications(ServerRequest serverRequest) {
         return  serverRequest.bodyToMono(ApplicationsDTO.class)
@@ -70,9 +72,10 @@ public class ApplicationsHandler {
         Long idState = Long.valueOf(stateParam.get());
 
         return applicationsUseCase.updateApplication(idApps, idState).flatMap(
-                applicationsUpdated -> ServerResponse.ok()
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .bodyValue(applicationsUpdated)
-                );
+                applicationsUpdated -> {
+                    return ServerResponse.ok()
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .bodyValue(applicationsUpdated);
+                });
     }
 }

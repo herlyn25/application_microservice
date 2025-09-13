@@ -1,15 +1,16 @@
 package bootcamp.reto.powerup.r2dbc;
 
+import com.google.gson.Gson;
 import bootcamp.reto.powerup.model.ConstantsApps;
 import bootcamp.reto.powerup.model.applications.Applications;
 import bootcamp.reto.powerup.model.applications.gateways.ApplicationsRepository;
 import bootcamp.reto.powerup.model.exceptions.ResourceNotFoundException;
+import bootcamp.reto.powerup.model.sqs.gateways.SQSRepository;
 import bootcamp.reto.powerup.model.states.States;
 import bootcamp.reto.powerup.model.states.gateways.StatesRepository;
 import bootcamp.reto.powerup.model.userconsumer.utils.ApplicationsResponse;
 import bootcamp.reto.powerup.r2dbc.entities.ApplicationsEntity;
 import bootcamp.reto.powerup.r2dbc.helper.ReactiveAdapterOperations;
-import bootcamp.reto.powerup.model.userconsumer.utils.PageResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.stereotype.Repository;
@@ -29,11 +30,13 @@ public class ApplicationsReactiveRepositoryAdapter extends ReactiveAdapterOperat
 > implements ApplicationsRepository {
     private final TransactionalOperator transactionalOperator;
     private final StatesRepository statesRepository;
+    private final SQSRepository sqsRepository;
 
-    public ApplicationsReactiveRepositoryAdapter(ApplicationsReactiveRepository repository, ObjectMapper mapper, TransactionalOperator transactionalOperator, StatesRepository statesRepository) {
+    public ApplicationsReactiveRepositoryAdapter(ApplicationsReactiveRepository repository, ObjectMapper mapper, TransactionalOperator transactionalOperator, StatesRepository statesRepository, SQSRepository sqsRepository) {
         super(repository, mapper, entity -> mapper.map(entity, Applications.class));
         this.transactionalOperator = transactionalOperator;
         this.statesRepository = statesRepository;
+        this.sqsRepository = sqsRepository;
     }
 
     @Override
@@ -56,7 +59,7 @@ public class ApplicationsReactiveRepositoryAdapter extends ReactiveAdapterOperat
     }
 
     @Override
-    public Mono<Applications> updateApps(Long idApps, Long state) {
+    public Mono<String> updateApps(Long idApps, Long state) {
         return Mono.zip(validateIdApps(idApps), validateState(state))
                 .flatMap(validatedIds -> {
                     Long validIdApps = validatedIds.getT1();
@@ -70,9 +73,22 @@ public class ApplicationsReactiveRepositoryAdapter extends ReactiveAdapterOperat
                 .flatMap(tupleData -> {
                     States states = tupleData.getT1();
                     Applications applications = tupleData.getT2();
-                    log.info("Estado de prestamo: {}", states.getName());
+
                     applications.setStates(states.getName());
+                    log.info("Estado de prestamo cambiado a : {}", applications.getStates());
                     return super.save(applications);
+                }).flatMap(appUpdated-> {
+                    if(appUpdated.getStates().equals("APROB") || appUpdated.getStates().equals("RCHZ")) {
+
+                        log.info("Body a cola: {}", convertObjectToJSONString(appUpdated));
+                        return sqsRepository.send(convertObjectToJSONString(appUpdated));
+                    }
+                    log.info("No se envió mensaje a cola solicitudes");
+                    return Mono.just(ConstantsApps.STATE_DIFFERENT_APROB_RECH);
+                }).onErrorResume(error-> {
+                    log.error("Error al actualizar aplicación - idApps: {}, state: {}, error: {}",
+                            idApps, state, error.getMessage(), error);
+                    return Mono.just(ConstantsApps.ERROR_TO_UPDATE + error.getMessage());
                 });
     }
 
@@ -112,5 +128,10 @@ public class ApplicationsReactiveRepositoryAdapter extends ReactiveAdapterOperat
             return Mono.error(new ResourceNotFoundException(ConstantsApps.ID_APPS_REQUERIED_FIELD));
         }
         return Mono.just(id);
+    }
+
+    private String convertObjectToJSONString(Applications applications){
+        Gson gson = new Gson();
+        return gson.toJson(applications);
     }
 }
