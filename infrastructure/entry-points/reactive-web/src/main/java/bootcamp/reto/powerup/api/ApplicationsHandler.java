@@ -30,8 +30,19 @@ public class ApplicationsHandler {
     private final UserConsumerUseCase  userConsumerUseCase;
 
     public Mono<ServerResponse> listenSaveApplications(ServerRequest serverRequest) {
-        return  serverRequest.bodyToMono(ApplicationsDTO.class)
+        var authHeader = Objects.requireNonNull(serverRequest.headers().firstHeader("Authorization")).describeConstable();
+
+        if (authHeader.isEmpty() || !authHeader.get().startsWith("Bearer ")) {
+            return ServerResponse.status(HttpStatus.UNAUTHORIZED)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(Map.of("error", "Token Bearer requerido"));
+        }
+        String token = authHeader.get().substring(7);
+
+        return serverRequest.bodyToMono(ApplicationsDTO.class)
                 .map(applicationMapper::dtoToApplications)
+                .flatMap(dtoApps-> userConsumerUseCase.userGet(dtoApps.getEmail(),token)
+                        .map(user-> dtoApps))
                 .flatMap(applicationsUseCase::saveApplication)
                 .flatMap( applicationsSaved ->
                         ServerResponse.created(URI.create("/api/v1/apps"))
@@ -46,6 +57,7 @@ public class ApplicationsHandler {
                     )
                 );
     }
+
     public Mono<ServerResponse> listenAppsConsumer(ServerRequest serverRequest) {
         int size = Integer.parseInt(serverRequest.queryParam("size").orElse("5"));
         int page = Integer.parseInt(serverRequest.queryParam("page").orElse("1"));
@@ -54,15 +66,17 @@ public class ApplicationsHandler {
         if (authHeader.isEmpty() || !authHeader.get().startsWith("Bearer ")) {
             return ServerResponse.status(HttpStatus.UNAUTHORIZED)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(Map.of("error", "Token Bearer requerido"));
+                    .bodyValue(Map.of("error", ConstantsApps.TOKEN_REQUIRED));
         }
 
         String token = authHeader.get().substring(7);
+
 
         return ServerResponse.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(userConsumerUseCase.userConsumerGet(page,size,token), UserConsumerFull.class);
     }
+
     public Mono<ServerResponse> listenUpdateStateApplications(ServerRequest serverRequest) {
         Long idApps = Long.valueOf(serverRequest.pathVariable("id"));
         Optional<String> stateParam = serverRequest.queryParam("state");

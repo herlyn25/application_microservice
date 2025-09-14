@@ -3,6 +3,7 @@ package bootcamp.reto.powerup.usecase.userconsumer;
 import bootcamp.reto.powerup.model.userconsumer.UserConsumerFull;
 import bootcamp.reto.powerup.model.userconsumer.gateways.UserConsumerRepository;
 import bootcamp.reto.powerup.model.userconsumer.utils.PageResponse;
+import bootcamp.reto.powerup.model.userconsumer.utils.UserConsumer;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
@@ -12,5 +13,9 @@ public class UserConsumerUseCase {
 
     public Mono<PageResponse<UserConsumerFull>> userConsumerGet(int size, int page, String token) {
         return repository.userGetApps(size, page, token);
+    }
+
+    public Mono<UserConsumer> userGet(String email, String token){
+        return repository.userGet(email, token);
     }
 }

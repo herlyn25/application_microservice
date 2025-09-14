@@ -3,6 +3,7 @@ package bootcamp.reto.powerup.consumer;
 import bootcamp.reto.powerup.consumer.exceptions.JwtException;
 import bootcamp.reto.powerup.model.ConstantsApps;
 import bootcamp.reto.powerup.model.applications.gateways.ApplicationsRepository;
+import bootcamp.reto.powerup.model.exceptions.ResourceNotFoundException;
 import bootcamp.reto.powerup.model.userconsumer.utils.PageResponse;
 import bootcamp.reto.powerup.model.userconsumer.utils.UserConsumer;
 import bootcamp.reto.powerup.model.userconsumer.UserConsumerFull;
@@ -66,19 +67,23 @@ public class RestConsumer implements UserConsumerRepository {
                 });
     });
     }
+
     @Override
     public Mono<UserConsumer> userGet(String email, String token) {
         return client.get()
-                                .uri("/api/v1/users/{email}", email)
-                                .header("Authorization", "Bearer " + token)
-                                .retrieve()
-                                .bodyToMono(UserConsumer.class);
+                .uri("/api/v1/users/{email}", email)
+                .header("Authorization", "Bearer " + token)
+                .retrieve()
+                .onStatus(HttpStatus.NOT_FOUND::equals,
+                    response -> Mono.error(new ResourceNotFoundException(ConstantsApps.USER_NO_EXIST)))
+                .bodyToMono(UserConsumer.class);
     }
+
     @Override
     public Mono<Boolean> isValidToken(String token) {
         return Mono.fromCallable(() -> {
             if (token == null || token.isEmpty()) {
-                throw new JwtException(HttpStatus.BAD_REQUEST,ConstantsApps.STATUS_400);
+                throw new JwtException(HttpStatus.BAD_REQUEST,ConstantsApps.TOKEN_REQUIRED);
             }
             try {
                 // Decodificar el token
