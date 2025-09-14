@@ -1,5 +1,7 @@
 package bootcamp.reto.powerup.r2dbc;
 
+import bootcamp.reto.powerup.model.loantype.LoanType;
+import bootcamp.reto.powerup.model.loantype.gateways.LoanTypeRepository;
 import com.google.gson.Gson;
 import bootcamp.reto.powerup.model.ConstantsApps;
 import bootcamp.reto.powerup.model.applications.Applications;
@@ -31,12 +33,14 @@ public class ApplicationsReactiveRepositoryAdapter extends ReactiveAdapterOperat
     private final TransactionalOperator transactionalOperator;
     private final StatesRepository statesRepository;
     private final SQSRepository sqsRepository;
+    private final LoanTypeRepository loanTypeRepository;
 
-    public ApplicationsReactiveRepositoryAdapter(ApplicationsReactiveRepository repository, ObjectMapper mapper, TransactionalOperator transactionalOperator, StatesRepository statesRepository, SQSRepository sqsRepository) {
+    public ApplicationsReactiveRepositoryAdapter(ApplicationsReactiveRepository repository, ObjectMapper mapper, TransactionalOperator transactionalOperator, StatesRepository statesRepository, SQSRepository sqsRepository, LoanTypeRepository loanTypeRepository) {
         super(repository, mapper, entity -> mapper.map(entity, Applications.class));
         this.transactionalOperator = transactionalOperator;
         this.statesRepository = statesRepository;
         this.sqsRepository = sqsRepository;
+        this.loanTypeRepository = loanTypeRepository;
     }
 
     @Override
@@ -46,14 +50,15 @@ public class ApplicationsReactiveRepositoryAdapter extends ReactiveAdapterOperat
 
         return Mono.just(applications)
                 .map(this::toData)
-                .doOnNext(entity -> log.debug("Entity to save: {}", entity))
-                .flatMap(entity -> repository.save(entity))
+                .flatMap(entity ->repository.save(entity))
                 .doOnNext(savedEntity -> log.debug("Entity saved: {}", savedEntity))
                 .map(this::toEntity)
+                .flatMap(this::sendMessageSQS)
                 .as(transactionalOperator::transactional)
                 .doOnNext(applicationsSaved -> {
                     log.info("Solicitud de prestamo guardada correctamente con ID: {}", applicationsSaved.getId());
                     log.debug("Saved application: {}", applicationsSaved);
+
                 })
                 .doOnError(error -> log.error("Error al guardar la solicitud de prestamo", error));
     }
@@ -79,7 +84,6 @@ public class ApplicationsReactiveRepositoryAdapter extends ReactiveAdapterOperat
                     return super.save(applications);
                 }).flatMap(appUpdated-> {
                     if(appUpdated.getStates().equals("APROB") || appUpdated.getStates().equals("RCHZ")) {
-
                         log.info("Body a cola: {}", convertObjectToJSONString(appUpdated));
                         return sqsRepository.send(convertObjectToJSONString(appUpdated));
                     }
@@ -88,7 +92,7 @@ public class ApplicationsReactiveRepositoryAdapter extends ReactiveAdapterOperat
                 }).onErrorResume(error-> {
                     log.error("Error al actualizar aplicación - idApps: {}, state: {}, error: {}",
                             idApps, state, error.getMessage(), error);
-                    return Mono.just(ConstantsApps.ERROR_TO_UPDATE + error.getMessage());
+                    return Mono.error(new ResourceNotFoundException(error.getMessage()));
                 });
     }
 
@@ -128,6 +132,19 @@ public class ApplicationsReactiveRepositoryAdapter extends ReactiveAdapterOperat
             return Mono.error(new ResourceNotFoundException(ConstantsApps.ID_APPS_REQUERIED_FIELD));
         }
         return Mono.just(id);
+    }
+    private Mono<Applications> sendMessageSQS(Applications applications){
+        Mono<LoanType> loanTypeMono = loanTypeRepository.findLoanByCode(applications.getLoanType());
+        log.info("Sending loan type ");
+        return loanTypeMono.flatMap(loanType -> {
+            if(loanType.getAutomaticValidation()){
+                log.info(loanType.getUniqueCode());
+                log.info("Enviar a cola");
+                return Mono.just(applications);
+            }
+            log.info("No se envio a cola");
+           return Mono.just(applications);
+        });
     }
 
     private String convertObjectToJSONString(Applications applications){

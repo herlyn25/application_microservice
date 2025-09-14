@@ -1,8 +1,6 @@
 package bootcamp.reto.powerup.usecase.application;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import bootcamp.reto.powerup.model.applications.Applications;
 import bootcamp.reto.powerup.model.applications.gateways.ApplicationsRepository;
@@ -36,8 +34,15 @@ class ApplicationsUseCaseTest {
     private Applications inputApplication;
     private LoanType loanType;
 
+    private Long testApplicationId;
+    private Long testStateId;
+
+
     @BeforeEach
     void setUp() {
+        testApplicationId = 1L;
+        testStateId = 2L;
+
         inputApplication = new Applications();
         inputApplication.setAmount(new BigDecimal(10000.0));
         inputApplication.setTerms(12);
@@ -177,5 +182,56 @@ class ApplicationsUseCaseTest {
         StepVerifier.create(applicationsUseCase.saveApplication(inputApplication))
                 .expectNext(savedApplication)
                 .verifyComplete();
+    }
+    @Test
+    void updateApplication_ShouldReturnSuccessMessage_WhenUpdateIsSuccessful() {
+        // Given
+        String expectedMessage = "Application updated successfully";
+        when(applicationsRepository.updateApps(testApplicationId, testStateId))
+                .thenReturn(Mono.just(expectedMessage));
+
+        // When
+        Mono<String> result = applicationsUseCase.updateApplication(testApplicationId, testStateId);
+
+        // Then
+        StepVerifier.create(result)
+                .expectNext(expectedMessage)
+                .verifyComplete();
+
+        verify(applicationsRepository, times(1)).updateApps(testApplicationId, testStateId);
+    }
+
+    @Test
+    void updateApplication_ShouldPropagateError_WhenRepositoryThrowsException() {
+        // Given
+        RuntimeException expectedException = new RuntimeException("Database update failed");
+        when(applicationsRepository.updateApps(testApplicationId, testStateId))
+                .thenReturn(Mono.error(expectedException));
+
+        // When
+        Mono<String> result = applicationsUseCase.updateApplication(testApplicationId, testStateId);
+
+        // Then
+        StepVerifier.create(result)
+                .expectError(RuntimeException.class)
+                .verify();
+
+        verify(applicationsRepository, times(1)).updateApps(testApplicationId, testStateId);
+    }
+
+    @Test
+    void updateApplication_ShouldReturnEmpty_WhenApplicationNotFound() {
+        // Given
+        when(applicationsRepository.updateApps(testApplicationId, testStateId))
+                .thenReturn(Mono.empty());
+
+        // When
+        Mono<String> result = applicationsUseCase.updateApplication(testApplicationId, testStateId);
+
+        // Then
+        StepVerifier.create(result)
+                .verifyComplete();
+
+        verify(applicationsRepository, times(1)).updateApps(testApplicationId, testStateId);
     }
 }

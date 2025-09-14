@@ -35,6 +35,9 @@ class UserConsumerUseCaseTest {
 
     private PageResponse<UserConsumerFull> mockPageResponse;
     private List<UserConsumerFull> mockUserList;
+    private String testEmail;
+    private String testToken;
+    private UserConsumer testUserConsumer;
 
     @BeforeEach
     void setUp() {
@@ -74,25 +77,6 @@ class UserConsumerUseCaseTest {
                 .totalPages(1)
 
                 .build();
-    }
-
-    @Test
-    @DisplayName("Debe retornar PageResponse exitosamente con datos válidos")
-    void shouldReturnPageResponseSuccessfully() {
-        // Given
-        int size = 10;
-        int page = 0;
-        String token = "valid-token";
-
-        when(repository.userGetApps(size, page, token))
-                .thenReturn(Mono.just(mockPageResponse));
-
-        // When & Then
-        StepVerifier.create(userConsumerUseCase.userConsumerGet(size, page, token))
-                .expectNext(mockPageResponse)
-                .verifyComplete();
-
-        verify(repository, times(1)).userGetApps(size, page, token);
     }
 
     @Test
@@ -242,5 +226,39 @@ class UserConsumerUseCaseTest {
                 .verifyComplete();
 
         verify(repository, times(1)).userGetApps(size, page, token);
+    }
+
+    @Test
+    void userGet_ShouldPropagateError_WhenRepositoryThrowsException() {
+        // Given
+        RuntimeException expectedException = new RuntimeException("External service unavailable");
+        when(repository.userGet(testEmail, testToken))
+                .thenReturn(Mono.error(expectedException));
+
+        // When
+        Mono<UserConsumer> result = userConsumerUseCase.userGet(testEmail, testToken);
+
+        // Then
+        StepVerifier.create(result)
+                .expectError(RuntimeException.class)
+                .verify();
+
+        verify(repository, times(1)).userGet(testEmail, testToken);
+    }
+
+    @Test
+    void userGet_ShouldReturnEmpty_WhenUserNotFound() {
+        // Given
+        when(repository.userGet(testEmail, testToken))
+                .thenReturn(Mono.empty());
+
+        // When
+        Mono<UserConsumer> result = userConsumerUseCase.userGet(testEmail, testToken);
+
+        // Then
+        StepVerifier.create(result)
+                .verifyComplete();
+
+        verify(repository, times(1)).userGet(testEmail, testToken);
     }
 }

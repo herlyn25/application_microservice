@@ -26,19 +26,16 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 null
         );
-        return Mono.just(new ResponseEntity<>(body, HttpStatus.BAD_REQUEST));
+        return Mono.just(new ResponseEntity<>(body, HttpStatus.NOT_FOUND));
     }
     @ExceptionHandler({ServerWebInputException.class})
     public ResponseEntity<Map<String, Object>> handleBadRequest(ServerWebInputException ex) {
-
         String message = ConstantsException.BAD_JSON_FORMAT;
 
-        // Si viene de Jackson, podemos obtener detalle
         Throwable cause = ex.getCause();
         if (cause instanceof JsonParseException || cause instanceof JsonMappingException) {
             message = cause.getMessage();
         }
-
         Map<String, Object> body = new HashMap<>();
         body.put("error", "Bad Request");
         body.put("message", message);
