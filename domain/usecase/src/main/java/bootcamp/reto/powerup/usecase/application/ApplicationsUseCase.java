@@ -25,7 +25,7 @@ public class ApplicationsUseCase {
                             saved.setEmail(applications.getEmail());
                             saved.setStates(applications.getStates());
                             saved.setDocumentId(applications.getDocumentId());
-                            saved.setLoanType(loanType.getName());
+                            saved.setLoanType(loanType.getUniqueCode());
                             return applicationsRepository.saveApps(saved);
                         }));
     }

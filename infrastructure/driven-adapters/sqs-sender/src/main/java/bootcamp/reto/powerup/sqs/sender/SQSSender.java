@@ -31,4 +31,11 @@ public class SQSSender implements SQSRepository {
                 .messageBody(message)
                 .build();
     }
+
+    private SendMessageRequest buildRequest(String message, String queueUrl){
+        return  SendMessageRequest.builder()
+                .queueUrl(queueUrl)
+                .messageBody(message)
+                .build();
+    }
 }
