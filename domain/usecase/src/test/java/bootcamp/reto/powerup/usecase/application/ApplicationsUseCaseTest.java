@@ -21,7 +21,7 @@ import java.math.BigDecimal;
 
 @ExtendWith(MockitoExtension.class)
 class ApplicationsUseCaseTest {
-  /*
+
     @Mock
     private ApplicationsRepository applicationsRepository;
 
@@ -36,7 +36,7 @@ class ApplicationsUseCaseTest {
 
     private Long testApplicationId;
     private Long testStateId;
-
+    private String token = "mitokenfjkfkfkffkf";
 
     @BeforeEach
     void setUp() {
@@ -57,132 +57,16 @@ class ApplicationsUseCaseTest {
     }
 
     @Test
-    void saveApplication_WhenValidInput_ShouldSaveSuccessfully() {
-        // Given
-        Applications savedApplication = new Applications();
-        savedApplication.setId(1L);
-        savedApplication.setAmount(new BigDecimal(10000.0));
-        savedApplication.setTerms(12);
-        savedApplication.setEmail("test@example.com");
-        savedApplication.setStates("PENDING");
-        savedApplication.setDocumentId("12345678");
-        savedApplication.setLoanType("Personal Loan");
-
-        when(loanTypeRepository.findLoanByCode("PERSONAL"))
-                .thenReturn(Mono.just(loanType));
-
-        when(applicationsRepository.saveApps(any(Applications.class)))
-                .thenReturn(Mono.just(savedApplication));
-
-        // When & Then
-        StepVerifier.create(applicationsUseCase.saveApplication(inputApplication))
-                .expectNext(savedApplication)
-                .verifyComplete();
-
-        verify(loanTypeRepository).findLoanByCode("PERSONAL");
-        verify(applicationsRepository).saveApps(any(Applications.class));
-    }
-
-    @Test
     void saveApplication_WhenLoanTypeNotFound_ShouldCompleteEmpty() {
         // Given
         when(loanTypeRepository.findLoanByCode("PERSONAL"))
                 .thenReturn(Mono.empty());
 
         // When & Then
-        StepVerifier.create(applicationsUseCase.saveApplication(inputApplication))
-                .verifyComplete();
-
-        verify(loanTypeRepository).findLoanByCode("PERSONAL");
-        verify(applicationsRepository, never()).saveApps(any(Applications.class));
-    }
-
-    @Test
-    void saveApplication_WhenLoanTypeRepositoryFails_ShouldReturnError() {
-        // Given
-        RuntimeException repositoryError = new RuntimeException("Database connection error");
-
-        when(loanTypeRepository.findLoanByCode("PERSONAL"))
-                .thenReturn(Mono.error(repositoryError));
-
-        // When & Then
-        StepVerifier.create(applicationsUseCase.saveApplication(inputApplication))
-                .expectError(RuntimeException.class)
-                .verify();
-
-        verify(loanTypeRepository).findLoanByCode("PERSONAL");
-        verify(applicationsRepository, never()).saveApps(any(Applications.class));
-    }
-
-    @Test
-    void saveApplication_WhenSaveRepositoryFails_ShouldReturnError() {
-        // Given
-        RuntimeException saveError = new RuntimeException("Save operation failed");
-
-        when(loanTypeRepository.findLoanByCode("PERSONAL"))
-                .thenReturn(Mono.just(loanType));
-
-        when(applicationsRepository.saveApps(any(Applications.class)))
-                .thenReturn(Mono.error(saveError));
-
-        // When & Then
-        StepVerifier.create(applicationsUseCase.saveApplication(inputApplication))
-                .expectError(RuntimeException.class)
-                .verify();
-
-        verify(loanTypeRepository).findLoanByCode("PERSONAL");
-        verify(applicationsRepository).saveApps(any(Applications.class));
-    }
-
-    @Test
-    void saveApplication_ShouldMapLoanTypeNameCorrectly() {
-        // Given
-        Applications savedApplication = new Applications();
-        savedApplication.setLoanType("Personal Loan");
-
-        when(loanTypeRepository.findLoanByCode("PERSONAL"))
-                .thenReturn(Mono.just(loanType));
-
-        when(applicationsRepository.saveApps(any(Applications.class)))
-                .thenAnswer(invocation -> {
-                    Applications app = invocation.getArgument(0);
-                    // Verificar que el loanType se mapea correctamente
-                    assert "Personal Loan".equals(app.getLoanType());
-                    return Mono.just(savedApplication);
-                });
-
-        // When & Then
-        StepVerifier.create(applicationsUseCase.saveApplication(inputApplication))
-                .expectNext(savedApplication)
+        StepVerifier.create(applicationsUseCase.saveApplication(inputApplication, token))
                 .verifyComplete();
     }
 
-    @Test
-    void saveApplication_ShouldPreserveAllApplicationFields() {
-        // Given
-        Applications savedApplication = new Applications();
-
-        when(loanTypeRepository.findLoanByCode("PERSONAL"))
-                .thenReturn(Mono.just(loanType));
-
-        when(applicationsRepository.saveApps(any(Applications.class)))
-                .thenAnswer(invocation -> {
-                    Applications app = invocation.getArgument(0);
-                    // Verificar que todos los campos se preservan
-                    assert inputApplication.getAmount().equals(app.getAmount());
-                    assert inputApplication.getTerms().equals(app.getTerms());
-                    assert inputApplication.getEmail().equals(app.getEmail());
-                    assert inputApplication.getStates().equals(app.getStates());
-                    assert inputApplication.getDocumentId().equals(app.getDocumentId());
-                    assert "Personal Loan".equals(app.getLoanType());
-                    return Mono.just(savedApplication);
-                });
-
-        // When & Then
-        StepVerifier.create(applicationsUseCase.saveApplication(inputApplication))
-                .expectNext(savedApplication)
-                .verifyComplete();
-    }
     @Test
     void updateApplication_ShouldReturnSuccessMessage_WhenUpdateIsSuccessful() {
         // Given
@@ -233,5 +117,5 @@ class ApplicationsUseCaseTest {
                 .verifyComplete();
 
         verify(applicationsRepository, times(1)).updateApps(testApplicationId, testStateId);
-    }*/
+    }
 }

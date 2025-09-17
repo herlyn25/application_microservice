@@ -28,13 +28,6 @@ public class SQSSender implements SQSRepository {
                 .map(SendMessageResponse::messageId);
     }
 
-    /*private SendMessageRequest buildRequest(String message) {
-        return SendMessageRequest.builder()
-                .queueUrl(properties.queueUrl())
-                .messageBody(message)
-                .build();
-    }*/
-
     private SendMessageRequest buildRequest(String message, String queueUrl){
         return  SendMessageRequest.builder()
                 .queueUrl(queueUrl)

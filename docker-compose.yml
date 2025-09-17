@@ -34,6 +34,13 @@ services:
       - POSTGRES_PASSWORD=salsam2323
       - SPRING_PROFILES_ACTIVE=docker
       - REST_CONSUMER_URL=http://host.docker.internal:8080
+      - AWS_SQS_QUEUE_URL=https://sqs.us-east-1.amazonaws.com/880370050201/cola_cambio_estado_solicitud
+      - AWS_SQS_QUEUE_CAPACITY_URL=https://sqs.us-east-1.amazonaws.com/880370050201/cola_capacidad_de_endeudamiento
+      - AWS_ENDPOINT=https://sqs.us-east-1.amazonaws.com/880370050201
+      - AWS_QUEUE_URL_UPDATE=respuesta_actualiza_credit_request
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_DEFAULT_REGION=us-east-1
     ports:
       - "8081:8081"
     depends_on:

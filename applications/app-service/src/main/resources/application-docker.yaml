@@ -64,7 +64,25 @@ adapter:
   restconsumer:
     timeout: 5000
     url: "${REST_CONSUMER_URL:http://host.docker.internal:8080}"
+  sqs:
+    region: "${AWS_REGION}"
+    queueUrl: "${AWS_SQS_QUEUE_URL}"
+    queue-capacity-url: "${AWS_SQS_QUEUE_CAPACITY_URL}"
+    queue-update-state: "${AWS_SQS_UPDATE_STATE}"
+    credentials:
+      access-key: "${AWS_ACCESS_KEY_ID}"
+      secret-key: "${AWS_SECRET_ACCESS_KEY}"
 
 jwt:
   secret: "$mySecretKeyForJWT2024VeryLongAndSecureKey123456789"
   expiration: 3600000
+
+entrypoint:
+  sqs:
+    region: "${REGION:us-east-1}"
+    endpoint: "${AWS_ENDPOINT:https://sqs.us-east-1.amazonaws.com/880370050201}"
+    queueUrl: "${AWS_QUEUE_URL_UPDATE:respuesta_actualiza_credit_request}"
+    waitTimeSeconds: 20
+    maxNumberOfMessages: 10
+    visibilityTimeoutSeconds: 10
+    numberOfThreads: 1

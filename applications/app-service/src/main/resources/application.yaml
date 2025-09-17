@@ -17,6 +17,7 @@ spring:
     init:
       mode: "always"
       schema-locations: "classpath:schema.sql"
+
 postgres:
   host: "${POSTGRES_HOST:127.0.0.1}"
   port: "${POSTGRES_PORT:5433}"
@@ -24,10 +25,12 @@ postgres:
   schema: "public"
   username: "${POSTGRES_USER:hdj}"
   password: "${POSTGRES_PASSWORD:salsam2323}"
+
 server:
-  port: ${PORT}
+  port: "${PORT}"
   error:
     include-message: "always"
+
 management:
   endpoints:
     web:
@@ -40,26 +43,41 @@ management:
   health:
     circuitbreakers:
       enabled: true
+
 cors:
   allowed-origins: "http://localhost:4200,http://localhost:8080"
+
 logging:
   level:
     org.springframework.r2dbc: "DEBUG"
     bootcamp.reto.powerup.r2dbc: "DEBUG"
+    org.springframework.web.reactive: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
 adapter:
   restconsumer:
     timeout: 5000
     url: "http://localhost:8080"
   sqs:
-    region: "${AWS_REGION}"
-    queueUrl: "${AWS_SQS_QUEUE_URL}"
-    # endpoint: "http://localhost:8081/message"
-    queue-capacity-url: "${AWS_SQS_QUEUE_CAPACITY_URL}"
+    region: "${AWS_REGION:us-east-1}"
+    queueUrl: "${AWS_SQS_QUEUE_URL:https://sqs.us-east-1.amazonaws.com/880370050201/cola_cambio_estado_solicitud}"
+    queue-capacity-url: "${AWS_SQS_QUEUE_CAPACITY_URL:https://sqs.us-east-1.amazonaws.com/880370050201/cola_capacidad_de_endeudamiento}"
+    queue-update-state: "${AWS_SQS_UPDATE_STATE:respuesta_actualiza_credit_request}"
     credentials:
       access-key: "${AWS_ACCESS_KEY_ID}"
       secret-key: "${AWS_SECRET_ACCESS_KEY}"
+
 jwt:
   secret-key: "$mySecretKeyForJWT2024VeryLongAndSecureKey123456789"
   expiration: 3600000
 
-
+entrypoint:
+  sqs:
+    region: "${REGION:us-east-1}"
+    endpoint: "${AWS_ENDPOINT:https://sqs.us-east-1.amazonaws.com/880370050201}"
+    queueUrl: "${AWS_QUEUE_URL_UPDATE:respuesta_actualiza_credit_request}"
+    waitTimeSeconds: 20
+    maxNumberOfMessages: 10
+    visibilityTimeoutSeconds: 10
+    numberOfThreads: 1
