@@ -9,7 +9,8 @@ CREATE TABLE IF NOT EXISTS states (
 insert into states (name,description)
 values ('PPV','Pendiente'),
     ('APROB', 'Aprobado'),
-    ('RCHZ', 'Rechazado')
+    ('RCHZ', 'Rechazado'),
+    ('RVM', 'Revision manual')
 ON CONFLICT(name) DO NOTHING;
 
 -- Crear tabla de tipos de préstamo primero (por las dependencias)

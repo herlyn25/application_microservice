@@ -12,7 +12,6 @@ public class ApplicationsDomainValidation {
     private static final Pattern EMAIL_PATTERN = Pattern.compile(ConstantsApps.PATTERN_EMAIL);
     private static final Pattern DOCUMENT_ID_PATTERN = Pattern.compile(ConstantsApps.PATTERN_DOCUMENT_ID);
 
-
     public static Mono<Applications> validateApplications(Applications app) {
         List<String> errors = new ArrayList<>();
         if (app.getEmail() == null || app.getEmail().isEmpty()) {

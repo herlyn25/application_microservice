@@ -2,6 +2,9 @@ package bootcamp.reto.powerup.r2dbc;
 
 import bootcamp.reto.powerup.model.loantype.LoanType;
 import bootcamp.reto.powerup.model.loantype.gateways.LoanTypeRepository;
+import bootcamp.reto.powerup.model.userconsumer.gateways.UserConsumerAppsRepository;
+import bootcamp.reto.powerup.model.userconsumer.utils.ApplicationsUserAppsResponse;
+import bootcamp.reto.powerup.model.userconsumer.utils.UserConsumer;
 import com.google.gson.Gson;
 import bootcamp.reto.powerup.model.ConstantsApps;
 import bootcamp.reto.powerup.model.applications.Applications;
@@ -15,12 +18,14 @@ import bootcamp.reto.powerup.r2dbc.entities.ApplicationsEntity;
 import bootcamp.reto.powerup.r2dbc.helper.ReactiveAdapterOperations;
 import lombok.extern.slf4j.Slf4j;
 import org.reactivecommons.utils.ObjectMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Slf4j
 @Repository
@@ -34,31 +39,39 @@ public class ApplicationsReactiveRepositoryAdapter extends ReactiveAdapterOperat
     private final StatesRepository statesRepository;
     private final SQSRepository sqsRepository;
     private final LoanTypeRepository loanTypeRepository;
+    private final UserConsumerAppsRepository userConsumerAppsRepository;
 
-    public ApplicationsReactiveRepositoryAdapter(ApplicationsReactiveRepository repository, ObjectMapper mapper, TransactionalOperator transactionalOperator, StatesRepository statesRepository, SQSRepository sqsRepository, LoanTypeRepository loanTypeRepository) {
+
+    @Value("${adapter.sqs.queueUrl}")
+    private String queueUrl;
+
+    @Value("${adapter.sqs.queue-capacity-url}")
+    private String queueCapacityUrl;
+
+    public ApplicationsReactiveRepositoryAdapter(ApplicationsReactiveRepository repository, ObjectMapper mapper, TransactionalOperator transactionalOperator, StatesRepository statesRepository, SQSRepository sqsRepository, LoanTypeRepository loanTypeRepository, UserConsumerAppsRepository userConsumerAppsRepository) {
         super(repository, mapper, entity -> mapper.map(entity, Applications.class));
         this.transactionalOperator = transactionalOperator;
         this.statesRepository = statesRepository;
         this.sqsRepository = sqsRepository;
         this.loanTypeRepository = loanTypeRepository;
+        this.userConsumerAppsRepository = userConsumerAppsRepository;
     }
 
     @Override
-    public Mono<Applications> saveApps(Applications applications) {
+    public Mono<Applications> saveApps(Applications applications, String token) {
         log.info("Iniciando el guardado de la solicitud de prestamo para: {}", applications.getEmail());
         log.debug("Application data: {}", applications);
 
         return Mono.just(applications)
                 .map(this::toData)
-                .flatMap(entity ->repository.save(entity))
                 .doOnNext(savedEntity -> log.debug("Entity saved: {}", savedEntity))
-                .map(this::toEntity)
-                .flatMap(this::sendMessageSQS)
+                .flatMap(entity->repository.save(entity))
+                .flatMap(applicationsEntity -> sendMessageSQS(mapper.map(applicationsEntity, Applications.class), token))
+                .doOnNext(savedEntity-> log.debug("Entity saved: {}", savedEntity))
                 .as(transactionalOperator::transactional)
                 .doOnNext(applicationsSaved -> {
                     log.info("Solicitud de prestamo guardada correctamente con ID: {}", applicationsSaved.getId());
                     log.debug("Saved application: {}", applicationsSaved);
-
                 })
                 .doOnError(error -> log.error("Error al guardar la solicitud de prestamo", error));
     }
@@ -85,7 +98,7 @@ public class ApplicationsReactiveRepositoryAdapter extends ReactiveAdapterOperat
                 }).flatMap(appUpdated-> {
                     if(appUpdated.getStates().equals("APROB") || appUpdated.getStates().equals("RCHZ")) {
                         log.info("Body a cola: {}", convertObjectToJSONString(appUpdated));
-                        return sqsRepository.send(convertObjectToJSONString(appUpdated));
+                        return sqsRepository.send(convertObjectToJSONString(appUpdated), queueUrl);
                     }
                     log.info("No se envió mensaje a cola solicitudes");
                     return Mono.just(ConstantsApps.STATE_DIFFERENT_APROB_RECH);
@@ -133,21 +146,43 @@ public class ApplicationsReactiveRepositoryAdapter extends ReactiveAdapterOperat
         }
         return Mono.just(id);
     }
-    private Mono<Applications> sendMessageSQS(Applications applications){
+
+    private Mono<Applications> sendMessageSQS(Applications applications, String token){
+        Mono<List<ApplicationsResponse>> appsApproved = repository.findAppsByEmail(applications.getEmail())
+                .map(entity -> mapper.map(entity, ApplicationsResponse.class))
+                .collectList();
+        Mono<UserConsumer> userConsumer = userConsumerAppsRepository.userGetToApps(applications.getEmail(), token);
         Mono<LoanType> loanTypeMono = loanTypeRepository.findLoanByCode(applications.getLoanType());
+        Mono<Applications> applicationsMono = Mono.just(applications);
+
         log.info("Sending loan type ");
         return loanTypeMono.flatMap(loanType -> {
             if(loanType.getAutomaticValidation()){
                 log.info(loanType.getUniqueCode());
                 log.info("Enviar a cola");
-                return Mono.just(applications);
+                return Mono.zip(appsApproved,userConsumer, applicationsMono, loanTypeMono)
+                        .flatMap(tupleElements -> {
+                            List<ApplicationsResponse> listApps = tupleElements.getT1();
+                            UserConsumer userConsumer1 = tupleElements.getT2();
+                            Applications applications1 = tupleElements.getT3();
+                            BigDecimal interest_rate = tupleElements.getT4().getInterestRate();
+                            ApplicationsUserAppsResponse applicationsUserAppsResponse = ApplicationsUserAppsResponse.builder()
+                                    .appsAproved(listApps)
+                                    .userConsumer(userConsumer1)
+                                    .applications(applications1)
+                                    .interest_rate(interest_rate)
+                                    .build();
+                            return sqsRepository.send(convertObjectToJSONString(applicationsUserAppsResponse), queueCapacityUrl)
+                                    .thenReturn(applications1);
+                        });
+
             }
             log.info("No se envio a cola");
            return Mono.just(applications);
         });
     }
 
-    private String convertObjectToJSONString(Applications applications){
+    private String convertObjectToJSONString(Object applications){
         Gson gson = new Gson();
         return gson.toJson(applications);
     }

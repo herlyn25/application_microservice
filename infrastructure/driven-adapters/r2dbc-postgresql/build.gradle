@@ -6,7 +6,7 @@ dependencies {
     implementation 'org.postgresql:r2dbc-postgresql'
     implementation 'org.reactivecommons.utils:object-mapper-api:0.1.0'
     implementation 'com.google.code.gson:gson:2.10.1'
-
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
     testImplementation 'org.reactivecommons.utils:object-mapper:0.1.0'
 }
 

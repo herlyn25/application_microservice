@@ -16,7 +16,7 @@ public class ConstantsApps {
     public static final String NOT_FOUND_STATE = "No Found resource states";
     // Invalid fields
     public static String INVALID_EMAIL = "Invalid Format Email";
-    public static String INVALID_DOCUMENT_ID = "Invalid Document Id";
+    public static String INVALID_DOCUMENT_ID = "Invalid Document Id only numbers (longitude 7-10 characters)";
 
     // Empty Fields
     public static String REQUIRED_EMAIL = "Email is required";

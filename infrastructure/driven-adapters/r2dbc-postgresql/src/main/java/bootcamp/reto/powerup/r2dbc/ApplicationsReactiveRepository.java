@@ -1,5 +1,6 @@
 package bootcamp.reto.powerup.r2dbc;
 
+import bootcamp.reto.powerup.model.applications.Applications;
 import bootcamp.reto.powerup.model.userconsumer.utils.ApplicationsResponse;
 import bootcamp.reto.powerup.r2dbc.entities.ApplicationsEntity;
 import org.springframework.data.r2dbc.repository.Query;
@@ -41,4 +42,15 @@ public interface ApplicationsReactiveRepository extends ReactiveCrudRepository<A
         WHERE cr.states = 'APROB'
     """)
     Mono<BigDecimal> totalAmountApprobation();
+
+    @Query("""
+        SELECT cr.amount, cr.terms, cr.email,
+               lty.name, lty.interest_rate,
+               st.description        
+        FROM credit_requests cr         
+        JOIN loan_type lty ON cr.loan_type = lty.unique_code
+        JOIN states st ON cr.states = st.name
+        WHERE cr.states = 'APROB' and cr.email = :email
+        """)
+    Flux<ApplicationsResponse> findAppsByEmail(String email);
 }

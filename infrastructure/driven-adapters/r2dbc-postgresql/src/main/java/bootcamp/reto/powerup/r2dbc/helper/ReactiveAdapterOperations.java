@@ -1,5 +1,6 @@
 package bootcamp.reto.powerup.r2dbc.helper;
 
+import bootcamp.reto.powerup.model.applications.Applications;
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.data.domain.Example;
 import org.springframework.data.repository.query.ReactiveQueryByExampleExecutor;

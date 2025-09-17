@@ -10,5 +10,4 @@ Mono<PageResponse<UserConsumerFull>> userGetApps(int page, int size, String toke
 Mono<UserConsumer> userGet(String email, String token);
 Mono<Boolean> isValidToken(String token);
 
-
 }

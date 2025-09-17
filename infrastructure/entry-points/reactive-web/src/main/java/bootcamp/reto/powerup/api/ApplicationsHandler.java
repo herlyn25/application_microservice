@@ -43,7 +43,7 @@ public class ApplicationsHandler {
                 .map(applicationMapper::dtoToApplications)
                 .flatMap(dtoApps-> userConsumerUseCase.userGet(dtoApps.getEmail(),token)
                         .map(user-> dtoApps))
-                .flatMap(applicationsUseCase::saveApplication)
+                .flatMap((Applications applications) -> applicationsUseCase.saveApplication(applications, token))
                 .flatMap( applicationsSaved ->
                         ServerResponse.created(URI.create("/api/v1/apps"))
                         .contentType(MediaType.APPLICATION_JSON)

@@ -54,6 +54,7 @@ adapter:
     region: "${AWS_REGION}"
     queueUrl: "${AWS_SQS_QUEUE_URL}"
     # endpoint: "http://localhost:8081/message"
+    queue-capacity-url: "${AWS_SQS_QUEUE_CAPACITY_URL}"
     credentials:
       access-key: "${AWS_ACCESS_KEY_ID}"
       secret-key: "${AWS_SECRET_ACCESS_KEY}"

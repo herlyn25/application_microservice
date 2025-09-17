@@ -24,6 +24,7 @@ class SQSUseCaseTest {
     private SQSUseCase sqsUseCase; // Reemplaza con el nombre real de tu clase
 
     private String testMessage;
+    private String queueUrl;
 
     @BeforeEach
     void setUp() {
@@ -34,100 +35,101 @@ class SQSUseCaseTest {
     void sendMessage_ShouldReturnMessageId_WhenMessageSentSuccessfully() {
         // Given
         String expectedMessageId = "msg-12345";
-        when(sqsRepository.send(testMessage))
+        when(sqsRepository.send(testMessage,queueUrl))
                 .thenReturn(Mono.just(expectedMessageId));
 
         // When
-        Mono<String> result = sqsUseCase.sendMessage(testMessage);
+        Mono<String> result = sqsUseCase.sendMessage(testMessage,queueUrl);
 
         // Then
         StepVerifier.create(result)
                 .expectNext(expectedMessageId)
                 .verifyComplete();
 
-        verify(sqsRepository, times(1)).send(testMessage);
+        verify(sqsRepository, times(1)).send(testMessage,queueUrl);
     }
 
     @Test
     void sendMessage_ShouldPropagateError_WhenRepositoryThrowsException() {
         // Given
         RuntimeException expectedException = new RuntimeException("SQS connection failed");
-        when(sqsRepository.send(testMessage))
+        when(sqsRepository.send(testMessage,queueUrl))
                 .thenReturn(Mono.error(expectedException));
 
         // When
-        Mono<String> result = sqsUseCase.sendMessage(testMessage);
+        Mono<String> result = sqsUseCase.sendMessage(testMessage,queueUrl);
 
         // Then
         StepVerifier.create(result)
                 .expectError(RuntimeException.class)
                 .verify();
 
-        verify(sqsRepository, times(1)).send(testMessage);
+        verify(sqsRepository, times(1)).send(testMessage,queueUrl);
     }
 
     @Test
     void sendMessage_ShouldReturnEmpty_WhenRepositoryReturnsEmpty() {
         // Given
-        when(sqsRepository.send(testMessage))
+        when(sqsRepository.send(testMessage,queueUrl))
                 .thenReturn(Mono.empty());
 
         // When
-        Mono<String> result = sqsUseCase.sendMessage(testMessage);
+        Mono<String> result = sqsUseCase.sendMessage(testMessage,queueUrl);
 
         // Then
         StepVerifier.create(result)
                 .verifyComplete();
 
-        verify(sqsRepository, times(1)).send(testMessage);
+        verify(sqsRepository, times(1)).send(testMessage,queueUrl);
     }
 
     @Test
     void sendMessage_ShouldCallRepositoryWithCorrectParameter() {
         // Given
         String specificMessage = "Specific test message";
-        when(sqsRepository.send(specificMessage))
+        when(sqsRepository.send(specificMessage,queueUrl))
                 .thenReturn(Mono.just("msg-67890"));
 
         // When
-        sqsUseCase.sendMessage(specificMessage).block();
+        sqsUseCase.sendMessage(specificMessage,queueUrl).block();
 
         // Then
-        verify(sqsRepository, times(1)).send(specificMessage);
+        verify(sqsRepository, times(1)).send(specificMessage,queueUrl);
     }
 
     @Test
     void sendMessage_ShouldHandleNullMessage() {
         // Given
-        when(sqsRepository.send(null))
+        when(sqsRepository.send(null, null))
                 .thenReturn(Mono.error(new IllegalArgumentException("Message cannot be null")));
 
         // When
-        Mono<String> result = sqsUseCase.sendMessage(null);
+        Mono<String> result = sqsUseCase.sendMessage(null, null);
 
         // Then
         StepVerifier.create(result)
                 .expectError(IllegalArgumentException.class)
                 .verify();
 
-        verify(sqsRepository, times(1)).send(null);
+        verify(sqsRepository, times(1)).send(null, null);
     }
 
     @Test
     void sendMessage_ShouldHandleEmptyMessage() {
         // Given
         String emptyMessage = "";
-        when(sqsRepository.send(emptyMessage))
+        String emptyQueueUrl = "";
+        when(sqsRepository.send(emptyMessage, emptyQueueUrl))
                 .thenReturn(Mono.just("msg-empty"));
 
         // When
-        Mono<String> result = sqsUseCase.sendMessage(emptyMessage);
+        Mono<String> result = sqsUseCase.sendMessage(emptyMessage, emptyQueueUrl);
 
         // Then
         StepVerifier.create(result)
                 .expectNext("msg-empty")
                 .verifyComplete();
 
-        verify(sqsRepository, times(1)).send(emptyMessage);
+        verify(sqsRepository, times(1)).send(emptyMessage, emptyQueueUrl);
     }
 }

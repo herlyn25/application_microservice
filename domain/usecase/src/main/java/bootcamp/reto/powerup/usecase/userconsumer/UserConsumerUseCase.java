@@ -15,6 +15,8 @@ public class UserConsumerUseCase {
         return repository.userGetApps(size, page, token);
     }
 
+
+
     public Mono<UserConsumer> userGet(String email, String token){
         return repository.userGet(email, token);
     }

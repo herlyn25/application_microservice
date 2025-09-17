@@ -1,6 +1,7 @@
 package bootcamp.reto.powerup.r2dbc;
 
 import bootcamp.reto.powerup.model.ConstantsApps;
+import bootcamp.reto.powerup.model.exceptions.ResourceNotFoundException;
 import bootcamp.reto.powerup.model.exceptions.TypeLoanException;
 import bootcamp.reto.powerup.model.loantype.LoanType;
 import bootcamp.reto.powerup.model.loantype.LoanTypeEnum;
@@ -43,6 +44,6 @@ public class LoanTypeReactiveRepositoryAdapter extends ReactiveAdapterOperations
                 return Mono.just(loanType);
             }
         }
-        return Mono.error(new TypeLoanException(ConstantsApps.TYPE_LOAN_NO_EXIST));
+        return Mono.error(new ResourceNotFoundException(ConstantsApps.TYPE_LOAN_NO_EXIST));
     }
 }

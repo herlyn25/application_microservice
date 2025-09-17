@@ -7,7 +7,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class SQSUseCase {
     private final SQSRepository sqsRepository;
-    public Mono<String> sendMessage(String message) {
-        return sqsRepository.send(message);
+    public Mono<String> sendMessage(String message, String queueUrl) {
+        return sqsRepository.send(message,queueUrl);
     }
 }

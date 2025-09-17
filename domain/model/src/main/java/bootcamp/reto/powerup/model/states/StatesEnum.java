@@ -6,7 +6,8 @@ import lombok.Getter;
 public enum StatesEnum {
     PENDIENTE(1L,"PPV", "Pendiente"),
     ENPROCESO(2L,"APROB", "Aprobado"),
-    RECHAZADO(3L,"RCHZ", "Rechazado");
+    RECHAZADO(3L,"RCHZ", "Rechazado"),
+    REVISIONMANUAL(4L,"RVM", "revision manual");
 
     private final Long  id;
     private final String name;

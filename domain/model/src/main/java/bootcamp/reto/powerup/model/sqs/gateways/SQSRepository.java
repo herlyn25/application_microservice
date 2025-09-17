@@ -4,6 +4,6 @@ import reactor.core.publisher.Mono;
 
 public interface SQSRepository {
 
-Mono<String> send(String message);
+Mono<String> send(String message, String queueUrl);
 
 }
