@@ -41,12 +41,14 @@ public class ApplicationsReactiveRepositoryAdapter extends ReactiveAdapterOperat
     private final LoanTypeRepository loanTypeRepository;
     private final UserConsumerAppsRepository userConsumerAppsRepository;
 
-
     @Value("${adapter.sqs.queueUrl}")
     private String queueUrl;
 
     @Value("${adapter.sqs.queue-capacity-url}")
     private String queueCapacityUrl;
+
+    @Value("${adapter.sqs.queue-report}")
+    private String queueReports;
 
     public ApplicationsReactiveRepositoryAdapter(ApplicationsReactiveRepository repository, ObjectMapper mapper, TransactionalOperator transactionalOperator, StatesRepository statesRepository, SQSRepository sqsRepository, LoanTypeRepository loanTypeRepository, UserConsumerAppsRepository userConsumerAppsRepository) {
         super(repository, mapper, entity -> mapper.map(entity, Applications.class));
@@ -67,7 +69,6 @@ public class ApplicationsReactiveRepositoryAdapter extends ReactiveAdapterOperat
                 .doOnNext(savedEntity -> log.debug("Entity saved: {}", savedEntity))
                 .flatMap(entity->repository.save(entity))
                 .flatMap(applicationsEntity -> sendMessageSQS(mapper.map(applicationsEntity, Applications.class), token))
-                .doOnNext(savedEntity-> log.debug("Entity saved: {}", savedEntity))
                 .as(transactionalOperator::transactional)
                 .doOnNext(applicationsSaved -> {
                     log.info("Solicitud de prestamo guardada correctamente con ID: {}", applicationsSaved.getId());
@@ -91,13 +92,17 @@ public class ApplicationsReactiveRepositoryAdapter extends ReactiveAdapterOperat
                 .flatMap(tupleData -> {
                     States states = tupleData.getT1();
                     Applications applications = tupleData.getT2();
-
                     applications.setStates(states.getName());
                     log.info("Estado de prestamo cambiado a : {}", applications.getStates());
                     return super.save(applications);
+
                 }).flatMap(appUpdated-> {
-                    if(appUpdated.getStates().equals("APROB") || appUpdated.getStates().equals("RCHZ")) {
-                        log.info("Body a cola: {}", convertObjectToJSONString(appUpdated));
+                    if(appUpdated.getStates().equals("APROB")) {
+                        log.info("Body Actualizado a cola reports: {}", convertObjectToJSONString(appUpdated));
+                        return sqsRepository.send(convertObjectToJSONString(appUpdated), queueReports);
+
+                    }else if(appUpdated.getStates().equals("RCHZ")) {
+                        log.info("Body a cola cambio estado: {}", convertObjectToJSONString(appUpdated));
                         return sqsRepository.send(convertObjectToJSONString(appUpdated), queueUrl);
                     }
                     log.info("No se envió mensaje a cola solicitudes");

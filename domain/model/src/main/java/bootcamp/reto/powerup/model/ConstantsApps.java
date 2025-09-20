@@ -14,9 +14,12 @@ public class ConstantsApps {
     public static String USER_NO_EXIST = "User no exists";
     public static String APPLICATIONS_NO_EXIST = "Credit request no exists";
     public static final String NOT_FOUND_STATE = "No Found resource states";
+
     // Invalid fields
     public static String INVALID_EMAIL = "Invalid Format Email";
     public static String INVALID_DOCUMENT_ID = "Invalid Document Id only numbers (longitude 7-10 characters)";
+    public static String INVALID_STATES = "You can not change state, The state alreay is: ";
+    public static String ERROR_APROB_STATES = "The status of the application is: ";
 
     // Empty Fields
     public static String REQUIRED_EMAIL = "Email is required";

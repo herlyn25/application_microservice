@@ -9,8 +9,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuples;
 import software.amazon.awssdk.services.sqs.model.Message;
 
+import java.time.Duration;
 import java.util.function.Function;
 
 @Slf4j
@@ -24,12 +26,16 @@ public class SQSProcessor implements Function<Message, Mono<Void>> {
 
     @Override
     public Mono<Void> apply(Message message) {
-        String messageBody = message.body();
-        log.info("Message body: {}", messageBody);
-        JsonObject jsonObject = new JsonParser().parse(messageBody).getAsJsonObject();
-        Long estado = jsonObject.get("estado").getAsLong();
-        Long idCreditRequest = jsonObject.get("id_credit_request").getAsLong();
-        log.info("Id Loan: {}, Id  Estado: {}", idCreditRequest, estado);
-        return applicationsUseCase.updateApplication(idCreditRequest, estado).then();
+        return Mono.fromCallable(()-> {
+            String messageBody = message.body();
+            log.info("Message llega a listener: {}", messageBody);
+            JsonObject jsonObject = new JsonParser().parse(messageBody).getAsJsonObject();
+            Long estado = jsonObject.get("estado").getAsLong();
+            Long idCreditRequest = jsonObject.get("id_credit_request").getAsLong();
+            return Tuples.of(idCreditRequest, estado);
+         }).flatMap(data-> applicationsUseCase.updateApplication(data.getT1(), data.getT2()))
+                .timeout(Duration.ofSeconds(30))
+                .doOnError(e-> log.error("Error procesando el mensaje {} : {}", message.messageId(), e.getMessage()))
+                .then();
     }
 }

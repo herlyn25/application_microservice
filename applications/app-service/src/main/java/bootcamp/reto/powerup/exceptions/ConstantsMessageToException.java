@@ -1,6 +1,6 @@
 package bootcamp.reto.powerup.exceptions;
 
-public class ConstantsException {
+public class ConstantsMessageToException {
     public static final String TIMESTAMP = "timestamp";
     public static String ERROR_VALIDATION = "Validation Error";
     public static String BAD_JSON_FORMAT = "Malformed JSON request";

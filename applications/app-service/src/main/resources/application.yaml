@@ -63,7 +63,7 @@ adapter:
     region: "${AWS_REGION:us-east-1}"
     queueUrl: "${AWS_SQS_QUEUE_URL:https://sqs.us-east-1.amazonaws.com/880370050201/cola_cambio_estado_solicitud}"
     queue-capacity-url: "${AWS_SQS_QUEUE_CAPACITY_URL:https://sqs.us-east-1.amazonaws.com/880370050201/cola_capacidad_de_endeudamiento}"
-    queue-update-state: "${AWS_SQS_UPDATE_STATE:respuesta_actualiza_credit_request}"
+    queue-report: "${AWS_SQS_QUEUE_REPORTS}"
     credentials:
       access-key: "${AWS_ACCESS_KEY_ID}"
       secret-key: "${AWS_SECRET_ACCESS_KEY}"

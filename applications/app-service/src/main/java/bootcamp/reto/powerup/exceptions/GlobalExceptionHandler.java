@@ -4,10 +4,12 @@ import bootcamp.reto.powerup.consumer.exceptions.JwtException;
 import bootcamp.reto.powerup.model.exceptions.ApplicationValidationException;
 import bootcamp.reto.powerup.model.exceptions.ResourceNotFoundException;
 import bootcamp.reto.powerup.model.exceptions.TypeLoanException;
+import bootcamp.reto.powerup.model.exceptions.ValidateStatesException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.server.ServerWebInputException;
 import reactor.core.publisher.Mono;
 import org.springframework.http.ResponseEntity;
@@ -19,10 +21,21 @@ import java.util.*;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(ValidateStatesException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Mono<ResponseEntity<Map<String, Object>>> handleValidationStates(ValidateStatesException ex) {
+        Map<String, Object> body = createErrorResponse(
+                ConstantsMessageToException.ERROR_VALIDATION,
+                ex.getMessage(),
+                null
+        );
+        return Mono.just(new ResponseEntity<>(body, HttpStatus.BAD_REQUEST));
+    }
+
     @ExceptionHandler(ResourceNotFoundException.class)
     public Mono<ResponseEntity<Map<String, Object>>> handleResourceNotFoundValidation(ResourceNotFoundException ex) {
         Map<String, Object> body = createErrorResponse(
-                ConstantsException.ERROR_VALIDATION,
+                ConstantsMessageToException.ERROR_VALIDATION,
                 ex.getMessage(),
                 null
         );
@@ -30,7 +43,7 @@ public class GlobalExceptionHandler {
     }
     @ExceptionHandler({ServerWebInputException.class})
     public ResponseEntity<Map<String, Object>> handleBadRequest(ServerWebInputException ex) {
-        String message = ConstantsException.BAD_JSON_FORMAT;
+        String message = ConstantsMessageToException.BAD_JSON_FORMAT;
 
         Throwable cause = ex.getCause();
         if (cause instanceof JsonParseException || cause instanceof JsonMappingException) {
@@ -48,7 +61,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ApplicationValidationException.class)
     public Mono<ResponseEntity<Map<String, Object>>> handleUserValidation(ApplicationValidationException ex) {
         Map<String, Object> body = createErrorResponse(
-                ConstantsException.ERROR_VALIDATION,
+                ConstantsMessageToException.ERROR_VALIDATION,
                 ex.getMessage(),
                 ex.getErrors()
         );
@@ -58,7 +71,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(TypeLoanException.class)
     public Mono<ResponseEntity<Map<String, Object>>> handleEmailAlreadyUsed(TypeLoanException ex) {
         Map<String, Object> body = createErrorResponse(
-                ConstantsException.LOAN_TYPE_NOT_FOUND,
+                ConstantsMessageToException.LOAN_TYPE_NOT_FOUND,
                 ex.getMessage(),
                 null
         );
@@ -68,8 +81,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public Mono<ResponseEntity<Map<String, Object>>> handleIllegalArgument(IllegalArgumentException ex) {
         Map<String, Object> body = createErrorResponse(
-               ConstantsException.INVALID_ARGUMENTS,
-                ex.getMessage() != null ? ex.getMessage() : ConstantsException.INVALID_REQUEST_PARAMETERS,
+               ConstantsMessageToException.INVALID_ARGUMENTS,
+                ex.getMessage() != null ? ex.getMessage() : ConstantsMessageToException.INVALID_REQUEST_PARAMETERS,
                 null
         );
         return Mono.just(new ResponseEntity<>(body, HttpStatus.BAD_REQUEST));
@@ -78,7 +91,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(JwtException.class)
     public Mono<ResponseEntity<Map<String, Object>>> handleAuthorizationException(JwtException jwtEx) {
         Map<String, Object> body = createErrorResponse(
-                ConstantsException.AUTHORIZATION_ERRORS,
+                ConstantsMessageToException.AUTHORIZATION_ERRORS,
                 jwtEx.getMessage() ,
                 null
         );
@@ -88,8 +101,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RuntimeException.class)
     public Mono<ResponseEntity<Map<String, Object>>> handleRuntimeException(RuntimeException ex) {
         Map<String, Object> body = createErrorResponse(
-                ConstantsException.INTERNAL_SERVER_ERROR,
-                ConstantsException.AN_UNEXPECTED_ERROR,
+                ConstantsMessageToException.INTERNAL_SERVER_ERROR,
+                ConstantsMessageToException.AN_UNEXPECTED_ERROR,
                 null
         );
         return Mono.just(new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR));
@@ -99,7 +112,7 @@ public class GlobalExceptionHandler {
     public Mono<ResponseEntity<Map<String, Object>>> handleGenericException(Exception ex) {
         Map<String, Object> body = createErrorResponse(
                 ex.toString(),
-                ConstantsException.AN_UNEXPECTED_ERROR,
+                ConstantsMessageToException.AN_UNEXPECTED_ERROR,
                 null
         );
         return Mono.just(new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR));
@@ -107,11 +120,11 @@ public class GlobalExceptionHandler {
 
     private Map<String, Object> createErrorResponse(String error, String message, Object details) {
         Map<String, Object> body = new LinkedHashMap<>();
-        body.put(ConstantsException.TIMESTAMP, Instant.now().toString());
-        body.put(ConstantsException.ERROR, error);
-        body.put(ConstantsException.MESSAGE, message);
+        body.put(ConstantsMessageToException.TIMESTAMP, Instant.now().toString());
+        body.put(ConstantsMessageToException.ERROR, error);
+        body.put(ConstantsMessageToException.MESSAGE, message);
         if (details != null) {
-            body.put(ConstantsException.DETAILS, details);
+            body.put(ConstantsMessageToException.DETAILS, details);
         }
         return body;
     }

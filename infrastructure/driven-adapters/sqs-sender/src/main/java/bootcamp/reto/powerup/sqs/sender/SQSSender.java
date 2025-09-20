@@ -18,8 +18,6 @@ public class SQSSender implements SQSRepository {
     private final SQSSenderProperties properties;
     private final SqsAsyncClient client;
 
-
-
     @Override
     public Mono<String> send(String message, String queueUrl) {
         return Mono.fromCallable(() -> buildRequest(message,queueUrl))
