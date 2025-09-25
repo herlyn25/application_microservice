@@ -29,21 +29,24 @@ services:
       dockerfile: deployment/Dockerfile
     container_name: requests_container
     environment:
+      - PORT=8081
+      - REST_CONSUMER_URL=http://host.docker.internal:8080
+      - SPRING_PROFILES_ACTIVE=docker
       - POSTGRES_HOST=powerup_applications
-      - POSTGRES_PORT=5432
+      - POSTGRES_PORT=5433
       - POSTGRES_DATABASE=crediyapps
       - POSTGRES_USERNAME=hdj
       - POSTGRES_PASSWORD=salsam2323
-      - SPRING_PROFILES_ACTIVE=docker
-      - REST_CONSUMER_URL=http://host.docker.internal:8080
-      - AWS_SQS_QUEUE_URL=https://sqs.us-east-1.amazonaws.com/880370050201/cola_cambio_estado_solicitud
-      - AWS_SQS_QUEUE_CAPACITY_URL=https://sqs.us-east-1.amazonaws.com/880370050201/cola_capacidad_de_endeudamiento
-      - AWS_ENDPOINT=https://sqs.us-east-1.amazonaws.com/880370050201
-      - AWS_QUEUE_URL_UPDATE=respuesta_actualiza_credit_request
+      - AWS_REGION=${AWS_REGION}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_DEFAULT_REGION=us-east-1
+      - AWS_SQS_QUEUE_URL=${AWS_SQS_QUEUE_URL}
+      - AWS_SQS_QUEUE_CAPACITY_URL=${AWS_SQS_QUEUE_CAPACITY_URL}
+      - AWS_ENDPOINT=${AWS_ENDPOINT}
+      - AWS_QUEUE_URL_UPDATE=${AWS_QUEUE_URL_UPDATE}
       - AWS_SQS_QUEUE_REPORTS=${AWS_SQS_QUEUE_REPORTS}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - JWT_EXPIRATION=${JWT_EXPIRATION}
     ports:
       - "8081:8081"
     depends_on:

@@ -4,9 +4,9 @@ spring:
   devtools:
     add-properties: false
   r2dbc:
-    url: "r2dbc:postgresql://${POSTGRES_HOST:127.0.0.1}:${POSTGRES_PORT:5433}/${POSTGRES_DB:crediyapps}"
-    username: "${POSTGRES_USER:hdj}"
-    password: "${POSTGRES_PASSWORD:salsam2323}"
+    url: "r2dbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
+    username: "${POSTGRES_USER}"
+    password: "${POSTGRES_PASSWORD}"
     pool:
       enabled: true
       initial-size: 2
@@ -15,16 +15,15 @@ spring:
       validation-query: "SELECT 1"
   sql:
     init:
-      mode: "always"
-      schema-locations: "classpath:schema.sql"
+      mode: never
 
 postgres:
   host: "${POSTGRES_HOST:127.0.0.1}"
-  port: "${POSTGRES_PORT:5433}"
-  database: "${POSTGRES_DB:crediyapps}"
+  port: "${POSTGRES_PORT}"
+  database: "${POSTGRES_DB}"
   schema: "public"
-  username: "${POSTGRES_USER:hdj}"
-  password: "${POSTGRES_PASSWORD:salsam2323}"
+  username: "${POSTGRES_USER}"
+  password: "${POSTGRES_PASSWORD}"
 
 server:
   port: "${PORT}"
@@ -45,7 +44,7 @@ management:
       enabled: true
 
 cors:
-  allowed-origins: "http://localhost:4200,http://localhost:8080"
+  allowed-origins: "http://localhost:4200,http://localhost:8081"
 
 logging:
   level:
@@ -58,25 +57,25 @@ logging:
 adapter:
   restconsumer:
     timeout: 5000
-    url: "http://localhost:8080"
+    url: "${URL_CONSUMER}"
   sqs:
-    region: "${AWS_REGION:us-east-1}"
-    queueUrl: "${AWS_SQS_QUEUE_URL:https://sqs.us-east-1.amazonaws.com/880370050201/cola_cambio_estado_solicitud}"
-    queue-capacity-url: "${AWS_SQS_QUEUE_CAPACITY_URL:https://sqs.us-east-1.amazonaws.com/880370050201/cola_capacidad_de_endeudamiento}"
+    region: "${AWS_REGION}"
+    queueUrl: "${AWS_SQS_QUEUE_URL}"
+    queue-capacity-url: "${AWS_SQS_QUEUE_CAPACITY_URL}"
     queue-report: "${AWS_SQS_QUEUE_REPORTS}"
     credentials:
       access-key: "${AWS_ACCESS_KEY_ID}"
       secret-key: "${AWS_SECRET_ACCESS_KEY}"
 
 jwt:
-  secret-key: "$mySecretKeyForJWT2024VeryLongAndSecureKey123456789"
-  expiration: 3600000
+  secret-key: "${JWT_SECRET_KEY}"
+  expiration: "${JWT_EXPIRATION}"
 
 entrypoint:
   sqs:
-    region: "${REGION:us-east-1}"
-    endpoint: "${AWS_ENDPOINT:https://sqs.us-east-1.amazonaws.com/880370050201}"
-    queueUrl: "${AWS_QUEUE_URL_UPDATE:respuesta_actualiza_credit_request}"
+    region: "${AWS_REGION}"
+    endpoint: "${AWS_ENDPOINT}"
+    queueUrl: "${AWS_QUEUE_URL_UPDATE}"
     waitTimeSeconds: 20
     maxNumberOfMessages: 10
     visibilityTimeoutSeconds: 10
