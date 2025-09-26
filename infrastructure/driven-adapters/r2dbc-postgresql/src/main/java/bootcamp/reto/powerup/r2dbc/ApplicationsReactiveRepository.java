@@ -59,7 +59,7 @@ public interface ApplicationsReactiveRepository extends ReactiveCrudRepository<A
     @Query("""
             SELECT count(*) as apps_approved, sum(amount) as amount_accum 
             FROM credit_requests  
-            WHERE states = 'APROB' AND created = :date"""
+            WHERE states = 'APROB'"""
     )
-    Mono<ApplicationReports> findApprovedApplicationsByDate(LocalDate date);
+    Mono<ApplicationReports> findApprovedApplicationsByDate();
 }

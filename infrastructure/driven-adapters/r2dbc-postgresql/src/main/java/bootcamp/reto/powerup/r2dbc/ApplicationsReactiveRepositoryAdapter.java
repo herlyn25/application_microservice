@@ -53,6 +53,9 @@ public class ApplicationsReactiveRepositoryAdapter extends ReactiveAdapterOperat
     @Value("${adapter.sqs.queue-report}")
     private String queueReports;
 
+    @Value("${adapter.sqs.queue-report-daily}")
+    private String queueReportDaily;
+
     public ApplicationsReactiveRepositoryAdapter(ApplicationsReactiveRepository repository, ObjectMapper mapper, TransactionalOperator transactionalOperator, StatesRepository statesRepository, SQSRepository sqsRepository, LoanTypeRepository loanTypeRepository, UserConsumerAppsRepository userConsumerAppsRepository) {
         super(repository, mapper, entity -> mapper.map(entity, Applications.class));
         this.transactionalOperator = transactionalOperator;
@@ -142,17 +145,21 @@ public class ApplicationsReactiveRepositoryAdapter extends ReactiveAdapterOperat
     }
 
     @Override
-    @Scheduled(fixedRate = 6000)
+    // @Scheduled(cron = "0 30 18 * * ?") // Todos los días a las 6:30 PM
+    //@Scheduled(fixedRate = 15000)
+    @Scheduled(cron ="0 */5 * * * *") // cada 5 min
     public void findAppsApprovedByDate() {
-        LocalDate now = LocalDate.now();
-        log.info(now.toString());
-        repository.findApprovedApplicationsByDate(now).subscribe(
+        log.info("Consultando el reporte diario");
+        repository.findApprovedApplicationsByDate().flatMap(
                 reports -> {
+                    if(reports.getAmountAccum()==null) {
+                        reports.setAmountAccum(BigDecimal.ZERO);
+                    }
                     log.info("Estoy enviando a la cola");
                     log.info("Counts: {}, Acum: {}",reports.getAppsApproved(), reports.getAmountAccum());
+                    return sqsRepository.send(convertObjectToJSONString(reports), queueReportDaily);
                 }
-        );
-
+        ).subscribe();
     }
 
     private Mono<Long> validateState(Long id){

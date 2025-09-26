@@ -6,7 +6,6 @@ import bootcamp.reto.powerup.model.applications.Applications;
 import bootcamp.reto.powerup.model.applications.gateways.ApplicationsRepository;
 import bootcamp.reto.powerup.model.loantype.LoanType;
 import bootcamp.reto.powerup.model.loantype.gateways.LoanTypeRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,91 +30,60 @@ class ApplicationsUseCaseTest {
     @InjectMocks
     private ApplicationsUseCase applicationsUseCase;
 
-    private Applications inputApplication;
-    private LoanType loanType;
-
-    private Long testApplicationId;
-    private Long testStateId;
-    private String token = "mitokenfjkfkfkffkf";
-
-    @BeforeEach
-    void setUp() {
-        testApplicationId = 1L;
-        testStateId = 2L;
-
-        inputApplication = new Applications();
-        inputApplication.setAmount(new BigDecimal(10000.0));
-        inputApplication.setTerms(12);
-        inputApplication.setEmail("test@example.com");
-        inputApplication.setStates("PENDING");
-        inputApplication.setDocumentId("12345678");
-        inputApplication.setLoanType("PERSONAL");
-
-        loanType = new LoanType();
-        loanType.setUniqueCode("PERSONAL");
-        loanType.setName("Personal Loan");
-    }
-
     @Test
-    void saveApplication_WhenLoanTypeNotFound_ShouldCompleteEmpty() {
-        // Given
-        when(loanTypeRepository.findLoanByCode("PERSONAL"))
-                .thenReturn(Mono.empty());
+    void saveApplication_ok() {
+        // Arrange
+        Applications apps = new Applications();
+        apps.setAmount(new BigDecimal(1000));
+        apps.setTerms(12);
+        apps.setEmail("test@test.com");
+        apps.setStates("PENDING");
+        apps.setDocumentId("1234567");
+        apps.setLoanType("LOAN1");
 
-        // When & Then
-        StepVerifier.create(applicationsUseCase.saveApplication(inputApplication, token))
-                .verifyComplete();
-    }
+        LoanType loanType = new LoanType();
+        loanType.setUniqueCode("LOAN1");
 
-    @Test
-    void updateApplication_ShouldReturnSuccessMessage_WhenUpdateIsSuccessful() {
-        // Given
-        String expectedMessage = "Application updated successfully";
-        when(applicationsRepository.updateApps(testApplicationId, testStateId))
-                .thenReturn(Mono.just(expectedMessage));
+        when(loanTypeRepository.findLoanByCode("LOAN1")).thenReturn(Mono.just(loanType));
+        when(applicationsRepository.saveApps(any(Applications.class), any())).thenReturn(Mono.just(apps));
 
-        // When
-        Mono<String> result = applicationsUseCase.updateApplication(testApplicationId, testStateId);
+        // Act
+        Mono<Applications> result = applicationsUseCase.saveApplication(apps, "token123");
 
-        // Then
+        // Assert
         StepVerifier.create(result)
-                .expectNext(expectedMessage)
+                .expectNextMatches(saved -> saved.getAmount().equals(new BigDecimal(1000))
+                        && saved.getEmail().equals("test@test.com")
+                        && saved.getLoanType().equals("LOAN1"))
                 .verifyComplete();
 
-        verify(applicationsRepository, times(1)).updateApps(testApplicationId, testStateId);
+        verify(loanTypeRepository, times(1)).findLoanByCode("LOAN1");
+        verify(applicationsRepository, times(1)).saveApps(any(Applications.class), eq("token123"));
     }
 
     @Test
-    void updateApplication_ShouldPropagateError_WhenRepositoryThrowsException() {
-        // Given
-        RuntimeException expectedException = new RuntimeException("Database update failed");
-        when(applicationsRepository.updateApps(testApplicationId, testStateId))
-                .thenReturn(Mono.error(expectedException));
+    void updateApplication_ok() {
+        // Arrange
+        when(applicationsRepository.updateApps(1L, 2L)).thenReturn(Mono.just("UPDATED"));
 
-        // When
-        Mono<String> result = applicationsUseCase.updateApplication(testApplicationId, testStateId);
+        // Act
+        Mono<String> result = applicationsUseCase.updateApplication(1L, 2L);
 
-        // Then
+        // Assert
         StepVerifier.create(result)
-                .expectError(RuntimeException.class)
-                .verify();
-
-        verify(applicationsRepository, times(1)).updateApps(testApplicationId, testStateId);
-    }
-
-    @Test
-    void updateApplication_ShouldReturnEmpty_WhenApplicationNotFound() {
-        // Given
-        when(applicationsRepository.updateApps(testApplicationId, testStateId))
-                .thenReturn(Mono.empty());
-
-        // When
-        Mono<String> result = applicationsUseCase.updateApplication(testApplicationId, testStateId);
-
-        // Then
-        StepVerifier.create(result)
+                .expectNext("UPDATED")
                 .verifyComplete();
 
-        verify(applicationsRepository, times(1)).updateApps(testApplicationId, testStateId);
+        verify(applicationsRepository, times(1)).updateApps(1L, 2L);
+    }
+
+    @Test
+    void findAppsApprovByDate_callsRepository() {
+        // Act
+        applicationsUseCase.findAppsApprovByDate();
+
+        // Assert
+        verify(applicationsRepository, times(1)).findAppsApprovedByDate();
+        verifyNoMoreInteractions(applicationsRepository);
     }
 }

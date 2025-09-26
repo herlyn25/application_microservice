@@ -63,6 +63,7 @@ adapter:
     queueUrl: "${AWS_SQS_QUEUE_URL}"
     queue-capacity-url: "${AWS_SQS_QUEUE_CAPACITY_URL}"
     queue-report: "${AWS_SQS_QUEUE_REPORTS}"
+    queue-report-daily: "${AWS_SQS_QUEUE_DAILY_REPORT}"
     credentials:
       access-key: "${AWS_ACCESS_KEY_ID}"
       secret-key: "${AWS_SECRET_ACCESS_KEY}"
