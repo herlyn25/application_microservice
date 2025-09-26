@@ -43,6 +43,7 @@ public class ApplicationsReactiveRepositoryAdapter extends ReactiveAdapterOperat
     private final SQSRepository sqsRepository;
     private final LoanTypeRepository loanTypeRepository;
     private final UserConsumerAppsRepository userConsumerAppsRepository;
+    private final Gson gson;
 
     @Value("${adapter.sqs.queueUrl}")
     private String queueUrl;
@@ -56,13 +57,14 @@ public class ApplicationsReactiveRepositoryAdapter extends ReactiveAdapterOperat
     @Value("${adapter.sqs.queue-report-daily}")
     private String queueReportDaily;
 
-    public ApplicationsReactiveRepositoryAdapter(ApplicationsReactiveRepository repository, ObjectMapper mapper, TransactionalOperator transactionalOperator, StatesRepository statesRepository, SQSRepository sqsRepository, LoanTypeRepository loanTypeRepository, UserConsumerAppsRepository userConsumerAppsRepository) {
+    public ApplicationsReactiveRepositoryAdapter(ApplicationsReactiveRepository repository, ObjectMapper mapper, TransactionalOperator transactionalOperator, StatesRepository statesRepository, SQSRepository sqsRepository, LoanTypeRepository loanTypeRepository, UserConsumerAppsRepository userConsumerAppsRepository, Gson gson) {
         super(repository, mapper, entity -> mapper.map(entity, Applications.class));
         this.transactionalOperator = transactionalOperator;
         this.statesRepository = statesRepository;
         this.sqsRepository = sqsRepository;
         this.loanTypeRepository = loanTypeRepository;
         this.userConsumerAppsRepository = userConsumerAppsRepository;
+        this.gson = gson;
     }
 
     @Override
@@ -212,7 +214,6 @@ public class ApplicationsReactiveRepositoryAdapter extends ReactiveAdapterOperat
     }
 
     private String convertObjectToJSONString(Object applications){
-        Gson gson = new Gson();
         return gson.toJson(applications);
     }
 }
