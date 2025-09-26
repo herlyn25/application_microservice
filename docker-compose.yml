@@ -33,7 +33,7 @@ services:
       - REST_CONSUMER_URL=http://host.docker.internal:8080
       - SPRING_PROFILES_ACTIVE=docker
       - POSTGRES_HOST=powerup_applications
-      - POSTGRES_PORT=5433
+      - POSTGRES_PORT=5432
       - POSTGRES_DATABASE=crediyapps
       - POSTGRES_USERNAME=hdj
       - POSTGRES_PASSWORD=salsam2323

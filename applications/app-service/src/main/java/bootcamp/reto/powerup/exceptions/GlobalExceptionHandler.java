@@ -7,6 +7,7 @@ import bootcamp.reto.powerup.model.exceptions.TypeLoanException;
 import bootcamp.reto.powerup.model.exceptions.ValidateStatesException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import java.time.Instant;
 import java.util.*;
 
+@Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -100,6 +102,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public Mono<ResponseEntity<Map<String, Object>>> handleRuntimeException(RuntimeException ex) {
+        log.error("Runtime exception occurred: ", ex);
         Map<String, Object> body = createErrorResponse(
                 ConstantsMessageToException.INTERNAL_SERVER_ERROR,
                 ConstantsMessageToException.AN_UNEXPECTED_ERROR,

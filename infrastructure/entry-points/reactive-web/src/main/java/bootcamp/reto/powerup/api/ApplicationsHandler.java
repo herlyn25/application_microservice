@@ -31,7 +31,6 @@ public class ApplicationsHandler {
 
     public Mono<ServerResponse> listenSaveApplications(ServerRequest serverRequest) {
         var authHeader = Objects.requireNonNull(serverRequest.headers().firstHeader("Authorization")).describeConstable();
-
         if (authHeader.isEmpty() || !authHeader.get().startsWith("Bearer ")) {
             return ServerResponse.status(HttpStatus.UNAUTHORIZED)
                     .contentType(MediaType.APPLICATION_JSON)

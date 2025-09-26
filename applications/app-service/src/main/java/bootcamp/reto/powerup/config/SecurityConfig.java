@@ -22,7 +22,7 @@ import java.nio.charset.StandardCharsets;
 @EnableWebFluxSecurity
 public class SecurityConfig {
 
-    @Value("${jwt.secret-key}")
+    @Value(value = "${jwt.secret-key}")
     private String secret;
 
     private SecretKey secretKey;

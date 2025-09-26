@@ -18,7 +18,7 @@ spring:
       mode: never
 
 postgres:
-  host: "${POSTGRES_HOST:127.0.0.1}"
+  host: "${POSTGRES_HOST}"
   port: "${POSTGRES_PORT}"
   database: "${POSTGRES_DB}"
   schema: "public"
@@ -57,7 +57,7 @@ logging:
 adapter:
   restconsumer:
     timeout: 5000
-    url: "${URL_CONSUMER}"
+    url: "${REST_CONSUMER_URL}"
   sqs:
     region: "${AWS_REGION}"
     queueUrl: "${AWS_SQS_QUEUE_URL}"
