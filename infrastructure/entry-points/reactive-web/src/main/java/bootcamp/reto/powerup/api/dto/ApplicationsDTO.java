@@ -6,6 +6,9 @@ import jakarta.validation.constraints.NotNull;
 
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
 public record ApplicationsDTO (
     @NotBlank(message="Amount is required")
@@ -22,10 +25,17 @@ public record ApplicationsDTO (
     String loanType,
 
     @NotBlank(message = "document id is required")
-    String documentId
+    String documentId,
+
+    LocalDate created
     ) {
 
     public ApplicationsDTO {
         states = (states == null || states.trim().isEmpty()) ? states = StatesEnum.PENDIENTE.getName() : states;
+        if (created == null) {
+            LocalDate now = LocalDate.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            created = LocalDate.parse(formatter.format(now), formatter);
+        }
     }
 }

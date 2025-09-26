@@ -1,5 +1,6 @@
 package bootcamp.reto.powerup.usecase.application;
 
+import bootcamp.reto.powerup.model.applications.ApplicationReports;
 import bootcamp.reto.powerup.model.applications.Applications;
 import bootcamp.reto.powerup.model.applications.gateways.ApplicationsRepository;
 import bootcamp.reto.powerup.model.userconsumer.UserConsumerFull;
@@ -10,6 +11,8 @@ import bootcamp.reto.powerup.model.validations.ApplicationsDomainValidation;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.time.LocalDate;
 
 
 @RequiredArgsConstructor
@@ -35,4 +38,7 @@ public class ApplicationsUseCase {
         return applicationsRepository.updateApps(id, state);
     }
 
+    public void findAppsApprovByDate() {
+        applicationsRepository.findAppsApprovedByDate();
+    }
 }

@@ -41,7 +41,8 @@ CREATE TABLE IF NOT EXISTS credit_requests (
     email VARCHAR(150) NOT NULL,
     states VARCHAR(50),
     loan_type VARCHAR(120) NOT NULL,  -- Cambiado para almacenar el nombre del loan type
-    document_id VARCHAR(50) NOT NULL
+    document_id VARCHAR(50) NOT NULL,
+    created DATE NOT NULL
     );
 
 -- Índices útiles

@@ -1,6 +1,4 @@
 package bootcamp.reto.powerup.model.applications;
-import bootcamp.reto.powerup.model.loantype.LoanType;
-import bootcamp.reto.powerup.model.states.States;
 import lombok.Builder;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -22,4 +21,5 @@ public class Applications {
     private String states;
     private String loanType;
     private String documentId;
+    private LocalDate created;
 }

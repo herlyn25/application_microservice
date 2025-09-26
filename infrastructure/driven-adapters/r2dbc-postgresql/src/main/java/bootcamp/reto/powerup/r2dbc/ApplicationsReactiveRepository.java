@@ -1,5 +1,6 @@
 package bootcamp.reto.powerup.r2dbc;
 
+import bootcamp.reto.powerup.model.applications.ApplicationReports;
 import bootcamp.reto.powerup.model.applications.Applications;
 import bootcamp.reto.powerup.model.userconsumer.utils.ApplicationsResponse;
 import bootcamp.reto.powerup.r2dbc.entities.ApplicationsEntity;
@@ -10,6 +11,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 // TODO: This file is just an example, you should delete or modify it
 public interface ApplicationsReactiveRepository extends ReactiveCrudRepository<ApplicationsEntity, Long>, ReactiveQueryByExampleExecutor<ApplicationsEntity> {
@@ -53,4 +55,11 @@ public interface ApplicationsReactiveRepository extends ReactiveCrudRepository<A
         WHERE cr.states = 'APROB' and cr.email = :email
         """)
     Flux<ApplicationsResponse> findAppsByEmail(String email);
+
+    @Query("""
+            SELECT count(*) as apps_approved, sum(amount) as amount_accum 
+            FROM credit_requests  
+            WHERE states = 'APROB' AND created = :date"""
+    )
+    Mono<ApplicationReports> findApprovedApplicationsByDate(LocalDate date);
 }

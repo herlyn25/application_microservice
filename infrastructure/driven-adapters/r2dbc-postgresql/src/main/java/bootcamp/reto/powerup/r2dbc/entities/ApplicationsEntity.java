@@ -9,6 +9,7 @@ import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Data
 @Builder
@@ -23,4 +24,5 @@ public class ApplicationsEntity {
     @Column("states") private String states;
     @Column("loan_type") private String loanType;
     @Column("document_id") private String documentId;
+    @Column("created")  private LocalDate created;
 }

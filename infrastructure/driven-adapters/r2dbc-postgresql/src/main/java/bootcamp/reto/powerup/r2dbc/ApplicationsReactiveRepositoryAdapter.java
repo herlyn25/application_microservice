@@ -1,5 +1,6 @@
 package bootcamp.reto.powerup.r2dbc;
 
+import bootcamp.reto.powerup.model.applications.ApplicationReports;
 import bootcamp.reto.powerup.model.loantype.LoanType;
 import bootcamp.reto.powerup.model.loantype.gateways.LoanTypeRepository;
 import bootcamp.reto.powerup.model.userconsumer.gateways.UserConsumerAppsRepository;
@@ -19,12 +20,14 @@ import bootcamp.reto.powerup.r2dbc.helper.ReactiveAdapterOperations;
 import lombok.extern.slf4j.Slf4j;
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j
@@ -136,6 +139,20 @@ public class ApplicationsReactiveRepositoryAdapter extends ReactiveAdapterOperat
     @Override
     public Mono<Applications> findAppsById(Long id) {
         return super.findById(id).switchIfEmpty(Mono.error(new ResourceNotFoundException(ConstantsApps.APPLICATIONS_NO_EXIST)));
+    }
+
+    @Override
+    @Scheduled(fixedRate = 6000)
+    public void findAppsApprovedByDate() {
+        LocalDate now = LocalDate.now();
+        log.info(now.toString());
+        repository.findApprovedApplicationsByDate(now).subscribe(
+                reports -> {
+                    log.info("Estoy enviando a la cola");
+                    log.info("Counts: {}, Acum: {}",reports.getAppsApproved(), reports.getAmountAccum());
+                }
+        );
+
     }
 
     private Mono<Long> validateState(Long id){

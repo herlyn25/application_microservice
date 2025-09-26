@@ -17,7 +17,8 @@ public class ApplicationMapper {
                 applicationsDTO.email(),
                 applicationsDTO.states(),
                 applicationsDTO.loanType(),
-                applicationsDTO.documentId()
+                applicationsDTO.documentId(),
+                applicationsDTO.created()
         );
     }
 }
